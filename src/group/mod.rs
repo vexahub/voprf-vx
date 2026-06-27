@@ -14,11 +14,11 @@ mod ristretto;
 
 use core::ops::{Add, Mul, Sub};
 
-use digest::core_api::BlockSizeUser;
+use digest::block_api::BlockSizeUser;
 use digest::{FixedOutput, HashMarker};
-use generic_array::typenum::{IsLess, IsLessOrEqual, Sum, U256};
-use generic_array::{ArrayLength, GenericArray};
-use rand_core::{TryCryptoRng, TryRngCore};
+use hybrid_array::typenum::{IsGreaterOrEqual, IsLess, IsLessOrEqual, Prod, Sum, True, U2, U256};
+use hybrid_array::{Array, ArraySize};
+use rand_core::{TryCryptoRng, TryRng};
 #[cfg(feature = "ristretto255")]
 pub use ristretto::Ristretto255;
 use subtle::{Choice, ConstantTimeEq};
@@ -32,10 +32,10 @@ pub trait Group
 where
     // `VoprfClientLen`, `PoprfClientLen`, `VoprfServerLen`, `PoprfServerLen`
     Self::ScalarLen: Add<Self::ElemLen>,
-    Sum<Self::ScalarLen, Self::ElemLen>: ArrayLength,
+    Sum<Self::ScalarLen, Self::ElemLen>: ArraySize,
     // `ProofLen`
     Self::ScalarLen: Add<Self::ScalarLen>,
-    Sum<Self::ScalarLen, Self::ScalarLen>: ArrayLength,
+    Sum<Self::ScalarLen, Self::ScalarLen>: ArraySize,
 {
     /// The type of group elements
     type Elem: ConstantTimeEq
@@ -45,7 +45,7 @@ where
         + for<'a> Mul<&'a Self::Scalar, Output = Self::Elem>;
 
     /// The byte length necessary to represent group elements
-    type ElemLen: ArrayLength + 'static;
+    type ElemLen: ArraySize + 'static;
 
     /// The type of base field scalars
     type Scalar: ConstantTimeEq
@@ -56,7 +56,18 @@ where
         + for<'a> Sub<&'a Self::Scalar, Output = Self::Scalar>;
 
     /// The byte length necessary to represent scalars
-    type ScalarLen: ArrayLength + 'static;
+    type ScalarLen: ArraySize + 'static;
+
+    /// Security parameter `k` in bytes (i.e. `k / 8`), as defined in
+    /// [RFC 9380 §8](https://www.rfc-editor.org/rfc/rfc9380#section-8).
+    ///
+    /// Used to enforce `H::OutputSize >= 2 * SecurityLevel` in
+    /// `hash_to_curve` and `hash_to_scalar`, which corresponds to the
+    /// `expand_message` requirement `len_in_bytes = 2 * k / 8`.
+    type SecurityLevel: ArraySize;
+
+    /// The OKM length for hash_to_scalar (>= ScalarLen, used by hash_to_field).
+    type OkmLen: ArraySize + hybrid_array::typenum::NonZero;
 
     /// Transforms a password and domain separation tag (DST) into a curve point
     ///
@@ -66,7 +77,9 @@ where
     fn hash_to_curve<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<Self::Elem, InternalError>
     where
         H: BlockSizeUser + Default + FixedOutput + HashMarker,
-        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize>;
+        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize, Output = True>,
+        Self::SecurityLevel: Mul<U2>,
+        H::OutputSize: IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>;
 
     /// Hashes a slice of pseudo-random bytes to a scalar
     ///
@@ -76,7 +89,9 @@ where
     fn hash_to_scalar<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<Self::Scalar, InternalError>
     where
         H: BlockSizeUser + Default + FixedOutput + HashMarker,
-        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize>;
+        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize, Output = True>,
+        Self::SecurityLevel: Mul<U2>,
+        H::OutputSize: IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>;
 
     /// Get the base point for the group
     fn base_elem() -> Self::Elem;
@@ -90,7 +105,7 @@ where
     }
 
     /// Serializes the `self` group element
-    fn serialize_elem(elem: Self::Elem) -> GenericArray<u8, Self::ElemLen>;
+    fn serialize_elem(elem: Self::Elem) -> Array<u8, Self::ElemLen>;
 
     /// Return an element from its fixed-length bytes representation. If the
     /// element is the identity element, return an error.
@@ -104,7 +119,7 @@ where
     ///
     /// # Errors
     /// [`Error::Rng`](crate::Error::Rng) if the random number generator fails.
-    fn random_scalar<R: TryRngCore + TryCryptoRng>(rng: &mut R) -> Result<Self::Scalar>;
+    fn random_scalar<R: TryRng + TryCryptoRng>(rng: &mut R) -> Result<Self::Scalar>;
 
     /// The multiplicative inverse of this scalar
     fn invert_scalar(scalar: Self::Scalar) -> Self::Scalar;
@@ -117,7 +132,7 @@ where
     fn zero_scalar() -> Self::Scalar;
 
     /// Serializes a scalar to bytes
-    fn serialize_scalar(scalar: Self::Scalar) -> GenericArray<u8, Self::ScalarLen>;
+    fn serialize_scalar(scalar: Self::Scalar) -> Array<u8, Self::ScalarLen>;
 
     /// Return a scalar from its fixed-length bytes representation. If the
     /// scalar is zero or invalid, then return an error.

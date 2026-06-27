@@ -360,7 +360,7 @@ fn test_voprf_blind_evaluate<CS: CipherSuite>(tvs: &[VOPRFTestVectorParameters])
             assert_eq!(&parameter, &message.serialize().as_slice());
         }
 
-        assert_eq!(&parameters.proof, &proof.serialize().as_slice());
+        assert_eq!(&parameters.proof, &proof.serialize().to_vec());
     }
     Ok(())
 }
@@ -386,8 +386,7 @@ fn test_poprf_blind_evaluate<CS: CipherSuite>(tvs: &[VOPRFTestVectorParameters])
                 blinded_elements.iter(),
                 &prepared_evaluation_elements,
                 &prepared_tweak,
-            )
-            .unwrap();
+            )?;
 
         let messages: Vec<_> = messages.collect();
 
@@ -395,7 +394,7 @@ fn test_poprf_blind_evaluate<CS: CipherSuite>(tvs: &[VOPRFTestVectorParameters])
             assert_eq!(&parameter, &message.serialize().as_slice());
         }
 
-        assert_eq!(&parameters.proof, &proof.serialize().as_slice());
+        assert_eq!(&parameters.proof, &proof.serialize().to_vec());
     }
     Ok(())
 }

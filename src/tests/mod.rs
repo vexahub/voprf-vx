@@ -10,3 +10,21 @@ mod cfrg_vectors;
 mod mock_rng;
 mod parser;
 mod test_cfrg_vectors;
+
+impl crate::CipherSuite for p256::NistP256 {
+    const ID: &'static [u8] = <p256::NistP256 as hash2curve::OprfParameters>::ID;
+    type Group = p256::NistP256;
+    type Hash = sha2::Sha256;
+}
+
+impl crate::CipherSuite for p384::NistP384 {
+    const ID: &'static [u8] = <p384::NistP384 as hash2curve::OprfParameters>::ID;
+    type Group = p384::NistP384;
+    type Hash = sha2::Sha384;
+}
+
+impl crate::CipherSuite for p521::NistP521 {
+    const ID: &'static [u8] = <p521::NistP521 as hash2curve::OprfParameters>::ID;
+    type Group = p521::NistP521;
+    type Hash = sha2::Sha512;
+}

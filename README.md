@@ -1,4 +1,4 @@
-# voprf ![Build Status](https://github.com/novifinancial/voprf/workflows/Rust%20CI/badge.svg)
+# voprf
 An implementation of a (verifiable) oblivious pseudorandom function (VOPRF)
 
 A VOPRF is a verifiable oblivious pseudorandom function, a protocol between a client and a server. The regular (non-verifiable) OPRF is also supported in this implementation.
@@ -8,7 +8,7 @@ This implementation is based on [RFC 9497](https://www.rfc-editor.org/rfc/rfc949
 Documentation
 -------------
 
-The API can be found [here](https://docs.rs/voprf/) along with an example for usage.
+The API can be found [here](https://docs.rs/voprf-vexahub/) along with an example for usage.
 
 Installation
 ------------
@@ -16,12 +16,12 @@ Installation
 Add the following line to the dependencies of your `Cargo.toml`:
 
 ```
-voprf = "0.6.0-pre.1"
+voprf = { package = "voprf-vexahub", version = "0.6.0-rc.0" }
 ```
 
 ### Minimum Supported Rust Version
 
-Rust **1.85** or higher.
+Rust **1.87** or higher.
 
 Contributors
 ------------

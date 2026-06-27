@@ -8,23 +8,26 @@
 
 //! Defines the CipherSuite trait to specify the underlying primitives for VOPRF
 
-use digest::core_api::BlockSizeUser;
-use digest::{FixedOutput, HashMarker, OutputSizeUser};
-use elliptic_curve::VoprfParameters;
-use generic_array::typenum::{IsLess, IsLessOrEqual, U256};
-use generic_array::ArrayLength;
-
 use crate::Group;
+use core::ops::Mul;
+use digest::block_api::BlockSizeUser;
+use digest::typenum::{IsLess, IsLessOrEqual, U256};
+use digest::{Digest, FixedOutput, HashMarker, OutputSizeUser};
+use hybrid_array::ArraySize;
+use hybrid_array::typenum::{IsGreaterOrEqual, Prod, True, U2};
 
 /// Configures the underlying primitives used in VOPRF
 pub trait CipherSuite
 where
-    <Self::Hash as OutputSizeUser>::OutputSize:
-        ArrayLength + IsLess<U256> + IsLessOrEqual<<Self::Hash as BlockSizeUser>::BlockSize>,
+    <Self::Group as Group>::SecurityLevel: Mul<U2>,
+    <Self::Hash as OutputSizeUser>::OutputSize: ArraySize
+        + IsLess<U256>
+        + IsLessOrEqual<<Self::Hash as BlockSizeUser>::BlockSize, Output = True>
+        + IsGreaterOrEqual<Prod<<Self::Group as Group>::SecurityLevel, U2>, Output = True>,
 {
     /// The ciphersuite identifier as dictated by
     /// <https://www.rfc-editor.org/rfc/rfc9497>
-    const ID: &'static str;
+    const ID: &'static [u8];
 
     /// A finite cyclic group along with a point representation that allows some
     /// customization on how to hash an input to a curve point. See [`Group`].
@@ -32,19 +35,5 @@ where
 
     /// The main hash function to use (for HKDF computations and hashing
     /// transcripts).
-    type Hash: BlockSizeUser + Default + FixedOutput + HashMarker;
-}
-
-impl<T: VoprfParameters> CipherSuite for T
-where
-    T: Group,
-    T::Hash: BlockSizeUser + Default + FixedOutput + HashMarker,
-    <T::Hash as OutputSizeUser>::OutputSize:
-        ArrayLength + IsLess<U256> + IsLessOrEqual<<T::Hash as BlockSizeUser>::BlockSize>,
-{
-    const ID: &'static str = T::ID;
-
-    type Group = T;
-
-    type Hash = T::Hash;
+    type Hash: Digest + BlockSizeUser + Default + FixedOutput + HashMarker;
 }

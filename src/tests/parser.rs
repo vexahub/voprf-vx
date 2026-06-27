@@ -15,55 +15,50 @@ pub(crate) fn rfc_to_json(input: &str) -> String {
 }
 
 fn parse_ciphersuites(input: &str) -> String {
-    let re = regex::Regex::new(r"\nA\.\d\.  (?P<ciphersuite>.+?)\n\n").unwrap();
+    let re = regex::Regex::new(r"\nA\.\d\. {2}(?P<ciphersuite>.+?)\n\n").unwrap();
     let mut ciphersuites = vec![];
 
     let chunks: Vec<&str> = re.split(input).collect();
-    let mut count = 1;
-    for caps in re.captures_iter(input) {
+    for (count, caps) in (1..).zip(re.captures_iter(input)) {
         let ciphersuite = format!(
             "\"{}\": {{ {} }}",
             &caps["ciphersuite"],
             parse_modes(chunks[count])
         );
+
         ciphersuites.push(ciphersuite);
-        count += 1;
     }
 
     ciphersuites.join(",\n")
 }
 
 fn parse_modes(input: &str) -> String {
-    let re = regex::Regex::new(r"A\.\d.\d\.  (?P<mode>.*?) Mode").unwrap();
+    let re = regex::Regex::new(r"A\.\d.\d\. {2}(?P<mode>.*?) Mode").unwrap();
     let mut modes = vec![];
 
     let chunks: Vec<&str> = re.split(input).collect();
-    let mut count = 1;
-    for caps in re.captures_iter(input) {
+    for (count, caps) in (1..).zip(re.captures_iter(input)) {
         let mode = format!(
             "\"{}\": [\n {} \n]",
             &caps["mode"],
             parse_vectors(chunks[count])
         );
         modes.push(mode);
-        count += 1;
     }
 
     modes.join(",\n")
 }
 
 fn parse_vectors(input: &str) -> String {
-    let re = regex::Regex::new(r"A\.\d.\d\.\d\.  Test Vector.*+\n").unwrap();
+    let re = regex::Regex::new(r"A\.\d.\d\.\d\. {2}Test Vector.*+\n").unwrap();
     let mut vectors = vec![];
 
     let chunks: Vec<&str> = re.split(input).collect();
     let init_params = parse_params(chunks[0]);
 
-    let mut count = 1;
-    for _ in re.captures_iter(input) {
+    for (count, _) in (1..).zip(re.captures_iter(input)) {
         let params = format!("{{\n{},\n{}\n}}", init_params, parse_params(chunks[count]));
         vectors.push(params);
-        count += 1;
     }
 
     vectors.join(",\n")

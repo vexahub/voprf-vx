@@ -12,13 +12,13 @@ use core::iter::{self, Map};
 
 use derive_where::derive_where;
 use digest::{Digest, Output};
-use generic_array::typenum::Unsigned;
-use generic_array::GenericArray;
-use rand_core::{TryCryptoRng, TryRngCore};
+use hybrid_array::Array;
+use hybrid_array::typenum::Unsigned;
+use rand_core::{TryCryptoRng, TryRng};
 
 use crate::common::{
-    derive_key_internal, deterministic_blind_unchecked, hash_to_group, i2osp_2,
-    server_evaluate_hash_input, BlindedElement, EvaluationElement, Mode, STR_FINALIZE,
+    BlindedElement, EvaluationElement, Mode, STR_FINALIZE, derive_key_internal,
+    deterministic_blind_unchecked, hash_to_group, i2osp_2, server_evaluate_hash_input,
 };
 #[cfg(feature = "serde")]
 use crate::serialization::serde::Scalar;
@@ -73,7 +73,7 @@ impl<CS: CipherSuite> OprfClient<CS> {
     ///
     /// # Errors
     /// [`Error::Input`] if the `input` is empty or longer then [`u16::MAX`].
-    pub fn blind<R: TryRngCore + TryCryptoRng>(
+    pub fn blind<R: TryRng + TryCryptoRng>(
         input: &[u8],
         blinding_factor_rng: &mut R,
     ) -> Result<OprfClientBlindResult<CS>> {
@@ -146,8 +146,8 @@ impl<CS: CipherSuite> OprfServer<CS> {
     ///
     /// # Errors
     /// [`Error::Protocol`] if the protocol fails and can't be completed.
-    pub fn new<R: TryRngCore + TryCryptoRng>(rng: &mut R) -> Result<Self> {
-        let mut seed = GenericArray::<_, <CS::Group as Group>::ScalarLen>::default();
+    pub fn new<R: TryRng + TryCryptoRng>(rng: &mut R) -> Result<Self> {
+        let mut seed = Array::<_, <CS::Group as Group>::ScalarLen>::default();
         rng.try_fill_bytes(&mut seed).map_err(|_| Error::Protocol)?;
         Self::new_from_seed(&seed, &[])
     }
@@ -267,12 +267,12 @@ fn finalize_after_unblind<
 mod tests {
     use core::ptr;
 
-    use rand::rngs::OsRng;
-    use rand::TryRngCore;
+    use rand::TryRng;
+    use rand::rngs::SysRng;
 
     use super::*;
-    use crate::common::{Dst, STR_HASH_TO_GROUP};
     use crate::Group;
+    use crate::common::{Dst, STR_HASH_TO_GROUP};
 
     fn prf<CS: CipherSuite>(
         input: &[u8],
@@ -280,7 +280,7 @@ mod tests {
         info: &[u8],
         mode: Mode,
     ) -> Output<CS::Hash> {
-        let dst = Dst::new::<CS, _, _>(STR_HASH_TO_GROUP, mode);
+        let dst = Dst::new::<CS, _>(STR_HASH_TO_GROUP, mode);
         let point = CS::Group::hash_to_curve::<CS::Hash>(&[input], &dst.as_dst()).unwrap();
 
         let res = point * &key;
@@ -293,7 +293,7 @@ mod tests {
 
     fn base_retrieval<CS: CipherSuite>() {
         let input = b"input";
-        let mut rng = OsRng;
+        let mut rng = SysRng;
         let client_blind_result = OprfClient::<CS>::blind(input, &mut rng).unwrap();
         let server = OprfServer::<CS>::new(&mut rng).unwrap();
         let message = server.blind_evaluate(&client_blind_result.message);
@@ -303,7 +303,7 @@ mod tests {
     }
 
     fn base_inversion_unsalted<CS: CipherSuite>() {
-        let mut rng = OsRng;
+        let mut rng = SysRng;
         let mut input = [0u8; 64];
         rng.try_fill_bytes(&mut input).unwrap();
         let client_blind_result = OprfClient::<CS>::blind(&input, &mut rng).unwrap();
@@ -312,7 +312,7 @@ mod tests {
             .finalize(&input, &EvaluationElement(client_blind_result.message.0))
             .unwrap();
 
-        let dst = Dst::new::<CS, _, _>(STR_HASH_TO_GROUP, Mode::Oprf);
+        let dst = Dst::new::<CS, _>(STR_HASH_TO_GROUP, Mode::Oprf);
         let point = CS::Group::hash_to_curve::<CS::Hash>(&[&input], &dst.as_dst()).unwrap();
         let res2 = finalize_after_unblind::<CS, _, _>(iter::once((input.as_ref(), point)), &[])
             .next()
@@ -324,7 +324,7 @@ mod tests {
 
     fn server_evaluate<CS: CipherSuite>() {
         let input = b"input";
-        let mut rng = OsRng;
+        let mut rng = SysRng;
         let client_blind_result = OprfClient::<CS>::blind(input, &mut rng).unwrap();
         let server = OprfServer::<CS>::new(&mut rng).unwrap();
         let server_result = server.blind_evaluate(&client_blind_result.message);
@@ -348,7 +348,7 @@ mod tests {
 
     fn zeroize_oprf_client<CS: CipherSuite>() {
         let input = b"input";
-        let mut rng = OsRng;
+        let mut rng = SysRng;
         let client_blind_result = OprfClient::<CS>::blind(input, &mut rng).unwrap();
 
         let mut state = client_blind_result.state;
@@ -362,7 +362,7 @@ mod tests {
 
     fn zeroize_oprf_server<CS: CipherSuite>() {
         let input = b"input";
-        let mut rng = OsRng;
+        let mut rng = SysRng;
         let client_blind_result = OprfClient::<CS>::blind(input, &mut rng).unwrap();
         let server = OprfServer::<CS>::new(&mut rng).unwrap();
         let mut message = server.blind_evaluate(&client_blind_result.message);

@@ -1,0 +1,97 @@
+name: Rust CI
+
+on: [ push, pull_request ]
+
+concurrency:
+  group: ci-${{ gitea.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt:
+    name: cargo fmt
+    runs-on: linux_amd64
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+
+  clippy:
+    name: cargo clippy
+    runs-on: linux_amd64
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Run cargo clippy
+        run: cargo clippy --all-features --all-targets -- -D warnings
+      - name: Run cargo doc
+        run: cargo doc --no-deps --document-private-items --features danger,std
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  test:
+    name: test (${{ matrix.toolchain }} / ${{ matrix.backend_feature || 'no backend' }} / ${{ matrix.frontend_feature || 'no frontend' }})
+    runs-on: linux_amd64
+    strategy:
+      fail-fast: false
+      matrix:
+        backend_feature:
+          - --features ristretto255-ciphersuite
+          - ""
+        frontend_feature:
+          - ""
+          - --features danger
+          - --features serde
+        toolchain:
+          - stable
+          - "1.87.0"
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: dtolnay/rust-toolchain@${{ matrix.toolchain }}
+      - name: Run cargo test
+        run: cargo test --no-default-features --lib --tests ${{ matrix.backend_feature }}
+      - name: Run cargo test with alloc
+        run: cargo test --no-default-features --lib --tests ${{ matrix.frontend_feature }} ${{ matrix.backend_feature }} --features alloc
+      - name: Run cargo test with std
+        run: cargo test --no-default-features --lib --tests ${{ matrix.frontend_feature }} ${{ matrix.backend_feature }} --features std
+      - name: Run cargo test with all features
+        run: cargo test --all-features
+
+  build-no-std:
+    name: no-std (${{ matrix.target }} / ${{ matrix.backend_feature || 'no backend' }})
+    runs-on: linux_amd64
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - wasm32-unknown-unknown
+          - thumbv6m-none-eabi
+        backend_feature:
+          - ""
+          - --features ristretto255-ciphersuite
+        frontend_feature:
+          - ""
+          - --features danger
+          - --features serde
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Build no-std
+        run: cargo build --verbose --target=${{ matrix.target }} --no-default-features ${{ matrix.frontend_feature }} ${{ matrix.backend_feature }}
+
+  audit:
+    name: cargo audit
+    runs-on: linux_amd64
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+      - name: Run cargo audit
+        run: cargo audit -D warnings

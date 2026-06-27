@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0-rc.0 (June 27, 2026)
+* MSRV bumped to 1.87
+* Migrated from `elliptic-curve 0.13` to `0.14`
+* Replaced `generic-array` with `hybrid-array`
+* Updated `digest` dependency to 0.11
+* Updated `rand_core` dependency to 0.10
+* Updated `rand` dependency to 0.10
+* Updated `sha2` dependency to 0.11
+* Updated `p256`, `p384`, `p521` dependencies to 0.14.0-rc
+* Replaced `elliptic-curve/hash2curve` feature with standalone `hash2curve 0.14` crate
+* Updated `hash_to_scalar` to use `MapToCurve::Length` as OKM length per RFC 9380, replacing the removed `GroupDigest::hash_to_scalar` method
+* Updated `random_scalar` to consume exactly `ScalarLen` bytes per attempt, adapting to the new `rand_core 0.10` API
+* Added `OkmLen` associated type to `Group` trait
+
 ## 0.6.0-pre.1 (April 6, 2026)
 * MSRV bumped to 1.85
 * Updated rand_core dependency to 0.9
