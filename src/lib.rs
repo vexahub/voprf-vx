@@ -53,7 +53,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
 //! use voprf_vexahub::OprfServer;
@@ -73,7 +73,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
 //! use voprf_vexahub::OprfClient;
@@ -94,7 +94,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::OprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -119,7 +119,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::OprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -152,7 +152,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::OprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -199,7 +199,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
 //! use voprf_vexahub::VoprfServer;
@@ -226,7 +226,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
 //! use voprf_vexahub::VoprfClient;
@@ -248,7 +248,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::{VoprfServerEvaluateResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -275,7 +275,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::VoprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -316,7 +316,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::VoprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -370,7 +370,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::VoprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -394,7 +394,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::{VoprfServerBatchEvaluateFinishResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -428,7 +428,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::{VoprfServerBatchEvaluateResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -462,7 +462,7 @@
 //! # #[cfg(feature = "ristretto255")]
 //! # type CipherSuite = voprf_vexahub::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
-//! # type CipherSuite = voprf_vexahub::P256CipherSuite;
+//! # type CipherSuite = p256::NistP256;
 //! # use voprf_vexahub::{VoprfServerBatchEvaluateResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
@@ -566,13 +566,9 @@ mod voprf;
 #[cfg(test)]
 mod tests;
 
-/// A [`CipherSuite`] using P-256 and SHA-256, exposed for doctests.
-#[cfg(feature = "doctest")]
-pub type P256CipherSuite = Suite<p256::NistP256, sha2::Sha256>;
-
 // Exports
 
-pub use crate::ciphersuite::{CipherSuite, Suite};
+pub use crate::ciphersuite::CipherSuite;
 #[cfg(feature = "danger")]
 pub use crate::common::derive_key;
 pub use crate::common::{

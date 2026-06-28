@@ -328,9 +328,9 @@ mod test {
                 let _ = $item::<crate::Ristretto255>::deserialize(&$bytes[..]);
             }
 
-            let _ = $item::<crate::Suite<p256::NistP256, sha2::Sha256>>::deserialize(&$bytes[..]);
-            let _ = $item::<crate::Suite<p384::NistP384, sha2::Sha384>>::deserialize(&$bytes[..]);
-            let _ = $item::<crate::Suite<p521::NistP521, sha2::Sha512>>::deserialize(&$bytes[..]);
+            let _ = $item::<p256::NistP256>::deserialize(&$bytes[..]);
+            let _ = $item::<p384::NistP384>::deserialize(&$bytes[..]);
+            let _ = $item::<p521::NistP521>::deserialize(&$bytes[..]);
         };
     }
 

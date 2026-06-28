@@ -17,7 +17,7 @@ use crate::tests::parser::*;
 use crate::{
     BlindedElement, CipherSuite, EvaluationElement, Group, OprfClient, OprfServer, PoprfClient,
     PoprfServer, PoprfServerBatchEvaluateFinishResult, PoprfServerBatchEvaluatePrepareResult,
-    Proof, Result, Suite, VoprfClient, VoprfServer, VoprfServerBatchEvaluateFinishResult,
+    Proof, Result, VoprfClient, VoprfServer, VoprfServerBatchEvaluateFinishResult,
 };
 
 #[derive(Debug)]
@@ -133,83 +133,83 @@ fn test_vectors() -> Result<()> {
     let p256_oprf_tvs =
         json_to_test_vectors!(rfc, String::from("P256-SHA256"), String::from("OPRF"));
     assert_ne!(p256_oprf_tvs.len(), 0);
-    test_oprf_seed_to_key::<Suite<NistP256, sha2::Sha256>>(&p256_oprf_tvs)?;
-    test_oprf_blind::<Suite<NistP256, sha2::Sha256>>(&p256_oprf_tvs)?;
-    test_oprf_blind_evaluate::<Suite<NistP256, sha2::Sha256>>(&p256_oprf_tvs)?;
-    test_oprf_finalize::<Suite<NistP256, sha2::Sha256>>(&p256_oprf_tvs)?;
-    test_oprf_evaluate::<Suite<NistP256, sha2::Sha256>>(&p256_oprf_tvs)?;
+    test_oprf_seed_to_key::<NistP256>(&p256_oprf_tvs)?;
+    test_oprf_blind::<NistP256>(&p256_oprf_tvs)?;
+    test_oprf_blind_evaluate::<NistP256>(&p256_oprf_tvs)?;
+    test_oprf_finalize::<NistP256>(&p256_oprf_tvs)?;
+    test_oprf_evaluate::<NistP256>(&p256_oprf_tvs)?;
 
     let p256_voprf_tvs =
         json_to_test_vectors!(rfc, String::from("P256-SHA256"), String::from("VOPRF"));
     assert_ne!(p256_voprf_tvs.len(), 0);
-    test_voprf_seed_to_key::<Suite<NistP256, sha2::Sha256>>(&p256_voprf_tvs)?;
-    test_voprf_blind::<Suite<NistP256, sha2::Sha256>>(&p256_voprf_tvs)?;
-    test_voprf_blind_evaluate::<Suite<NistP256, sha2::Sha256>>(&p256_voprf_tvs)?;
-    test_voprf_finalize::<Suite<NistP256, sha2::Sha256>>(&p256_voprf_tvs)?;
-    test_voprf_evaluate::<Suite<NistP256, sha2::Sha256>>(&p256_voprf_tvs)?;
+    test_voprf_seed_to_key::<NistP256>(&p256_voprf_tvs)?;
+    test_voprf_blind::<NistP256>(&p256_voprf_tvs)?;
+    test_voprf_blind_evaluate::<NistP256>(&p256_voprf_tvs)?;
+    test_voprf_finalize::<NistP256>(&p256_voprf_tvs)?;
+    test_voprf_evaluate::<NistP256>(&p256_voprf_tvs)?;
 
     let p256_poprf_tvs =
         json_to_test_vectors!(rfc, String::from("P256-SHA256"), String::from("POPRF"));
     assert_ne!(p256_poprf_tvs.len(), 0);
-    test_poprf_seed_to_key::<Suite<NistP256, sha2::Sha256>>(&p256_poprf_tvs)?;
-    test_poprf_blind::<Suite<NistP256, sha2::Sha256>>(&p256_poprf_tvs)?;
-    test_poprf_blind_evaluate::<Suite<NistP256, sha2::Sha256>>(&p256_poprf_tvs)?;
-    test_poprf_finalize::<Suite<NistP256, sha2::Sha256>>(&p256_poprf_tvs)?;
-    test_poprf_evaluate::<Suite<NistP256, sha2::Sha256>>(&p256_poprf_tvs)?;
+    test_poprf_seed_to_key::<NistP256>(&p256_poprf_tvs)?;
+    test_poprf_blind::<NistP256>(&p256_poprf_tvs)?;
+    test_poprf_blind_evaluate::<NistP256>(&p256_poprf_tvs)?;
+    test_poprf_finalize::<NistP256>(&p256_poprf_tvs)?;
+    test_poprf_evaluate::<NistP256>(&p256_poprf_tvs)?;
 
     let p384_oprf_tvs =
         json_to_test_vectors!(rfc, String::from("P384-SHA384"), String::from("OPRF"));
     assert_ne!(p384_oprf_tvs.len(), 0);
-    test_oprf_seed_to_key::<Suite<NistP384, sha2::Sha384>>(&p384_oprf_tvs)?;
-    test_oprf_blind::<Suite<NistP384, sha2::Sha384>>(&p384_oprf_tvs)?;
-    test_oprf_blind_evaluate::<Suite<NistP384, sha2::Sha384>>(&p384_oprf_tvs)?;
-    test_oprf_finalize::<Suite<NistP384, sha2::Sha384>>(&p384_oprf_tvs)?;
-    test_oprf_evaluate::<Suite<NistP384, sha2::Sha384>>(&p384_oprf_tvs)?;
+    test_oprf_seed_to_key::<NistP384>(&p384_oprf_tvs)?;
+    test_oprf_blind::<NistP384>(&p384_oprf_tvs)?;
+    test_oprf_blind_evaluate::<NistP384>(&p384_oprf_tvs)?;
+    test_oprf_finalize::<NistP384>(&p384_oprf_tvs)?;
+    test_oprf_evaluate::<NistP384>(&p384_oprf_tvs)?;
 
     let p384_voprf_tvs =
         json_to_test_vectors!(rfc, String::from("P384-SHA384"), String::from("VOPRF"));
     assert_ne!(p384_voprf_tvs.len(), 0);
-    test_voprf_seed_to_key::<Suite<NistP384, sha2::Sha384>>(&p384_voprf_tvs)?;
-    test_voprf_blind::<Suite<NistP384, sha2::Sha384>>(&p384_voprf_tvs)?;
-    test_voprf_blind_evaluate::<Suite<NistP384, sha2::Sha384>>(&p384_voprf_tvs)?;
-    test_voprf_finalize::<Suite<NistP384, sha2::Sha384>>(&p384_voprf_tvs)?;
-    test_voprf_evaluate::<Suite<NistP384, sha2::Sha384>>(&p384_voprf_tvs)?;
+    test_voprf_seed_to_key::<NistP384>(&p384_voprf_tvs)?;
+    test_voprf_blind::<NistP384>(&p384_voprf_tvs)?;
+    test_voprf_blind_evaluate::<NistP384>(&p384_voprf_tvs)?;
+    test_voprf_finalize::<NistP384>(&p384_voprf_tvs)?;
+    test_voprf_evaluate::<NistP384>(&p384_voprf_tvs)?;
 
     let p384_poprf_tvs =
         json_to_test_vectors!(rfc, String::from("P384-SHA384"), String::from("POPRF"));
     assert_ne!(p384_poprf_tvs.len(), 0);
-    test_poprf_seed_to_key::<Suite<NistP384, sha2::Sha384>>(&p384_poprf_tvs)?;
-    test_poprf_blind::<Suite<NistP384, sha2::Sha384>>(&p384_poprf_tvs)?;
-    test_poprf_blind_evaluate::<Suite<NistP384, sha2::Sha384>>(&p384_poprf_tvs)?;
-    test_poprf_finalize::<Suite<NistP384, sha2::Sha384>>(&p384_poprf_tvs)?;
-    test_poprf_evaluate::<Suite<NistP384, sha2::Sha384>>(&p384_poprf_tvs)?;
+    test_poprf_seed_to_key::<NistP384>(&p384_poprf_tvs)?;
+    test_poprf_blind::<NistP384>(&p384_poprf_tvs)?;
+    test_poprf_blind_evaluate::<NistP384>(&p384_poprf_tvs)?;
+    test_poprf_finalize::<NistP384>(&p384_poprf_tvs)?;
+    test_poprf_evaluate::<NistP384>(&p384_poprf_tvs)?;
 
     let p521_oprf_tvs =
         json_to_test_vectors!(rfc, String::from("P521-SHA512"), String::from("OPRF"));
     assert_ne!(p521_oprf_tvs.len(), 0);
-    test_oprf_seed_to_key::<Suite<NistP521, sha2::Sha512>>(&p521_oprf_tvs)?;
-    test_oprf_blind::<Suite<NistP521, sha2::Sha512>>(&p521_oprf_tvs)?;
-    test_oprf_blind_evaluate::<Suite<NistP521, sha2::Sha512>>(&p521_oprf_tvs)?;
-    test_oprf_finalize::<Suite<NistP521, sha2::Sha512>>(&p521_oprf_tvs)?;
-    test_oprf_evaluate::<Suite<NistP521, sha2::Sha512>>(&p521_oprf_tvs)?;
+    test_oprf_seed_to_key::<NistP521>(&p521_oprf_tvs)?;
+    test_oprf_blind::<NistP521>(&p521_oprf_tvs)?;
+    test_oprf_blind_evaluate::<NistP521>(&p521_oprf_tvs)?;
+    test_oprf_finalize::<NistP521>(&p521_oprf_tvs)?;
+    test_oprf_evaluate::<NistP521>(&p521_oprf_tvs)?;
 
     let p521_voprf_tvs =
         json_to_test_vectors!(rfc, String::from("P521-SHA512"), String::from("VOPRF"));
     assert_ne!(p521_voprf_tvs.len(), 0);
-    test_voprf_seed_to_key::<Suite<NistP521, sha2::Sha512>>(&p521_voprf_tvs)?;
-    test_voprf_blind::<Suite<NistP521, sha2::Sha512>>(&p521_voprf_tvs)?;
-    test_voprf_blind_evaluate::<Suite<NistP521, sha2::Sha512>>(&p521_voprf_tvs)?;
-    test_voprf_finalize::<Suite<NistP521, sha2::Sha512>>(&p521_voprf_tvs)?;
-    test_voprf_evaluate::<Suite<NistP521, sha2::Sha512>>(&p521_voprf_tvs)?;
+    test_voprf_seed_to_key::<NistP521>(&p521_voprf_tvs)?;
+    test_voprf_blind::<NistP521>(&p521_voprf_tvs)?;
+    test_voprf_blind_evaluate::<NistP521>(&p521_voprf_tvs)?;
+    test_voprf_finalize::<NistP521>(&p521_voprf_tvs)?;
+    test_voprf_evaluate::<NistP521>(&p521_voprf_tvs)?;
 
     let p521_poprf_tvs =
         json_to_test_vectors!(rfc, String::from("P521-SHA512"), String::from("POPRF"));
     assert_ne!(p521_poprf_tvs.len(), 0);
-    test_poprf_seed_to_key::<Suite<NistP521, sha2::Sha512>>(&p521_poprf_tvs)?;
-    test_poprf_blind::<Suite<NistP521, sha2::Sha512>>(&p521_poprf_tvs)?;
-    test_poprf_blind_evaluate::<Suite<NistP521, sha2::Sha512>>(&p521_poprf_tvs)?;
-    test_poprf_finalize::<Suite<NistP521, sha2::Sha512>>(&p521_poprf_tvs)?;
-    test_poprf_evaluate::<Suite<NistP521, sha2::Sha512>>(&p521_poprf_tvs)?;
+    test_poprf_seed_to_key::<NistP521>(&p521_poprf_tvs)?;
+    test_poprf_blind::<NistP521>(&p521_poprf_tvs)?;
+    test_poprf_blind_evaluate::<NistP521>(&p521_poprf_tvs)?;
+    test_poprf_finalize::<NistP521>(&p521_poprf_tvs)?;
+    test_poprf_evaluate::<NistP521>(&p521_poprf_tvs)?;
 
     Ok(())
 }

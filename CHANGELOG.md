@@ -2,7 +2,6 @@
 
 ## 0.7.0-pre.0 (June 28, 2026)
 * MSRV bumped to 1.87
-* `CipherSuite` no longer has a blanket impl via `VoprfParameters`; use `Suite<G, H>` instead (breaking change)
 * Migrated from `elliptic-curve 0.13` to `0.14`
 * Replaced `generic-array` with `hybrid-array`
 * Updated `digest` dependency to 0.11

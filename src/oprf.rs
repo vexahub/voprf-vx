@@ -271,8 +271,8 @@ mod tests {
     use rand::rngs::SysRng;
 
     use super::*;
+    use crate::Group;
     use crate::common::{Dst, STR_HASH_TO_GROUP};
-    use crate::{Group, Suite};
 
     fn prf<CS: CipherSuite>(
         input: &[u8],
@@ -393,26 +393,26 @@ mod tests {
             zeroize_oprf_server::<Ristretto255>();
         }
 
-        base_retrieval::<Suite<NistP256, sha2::Sha256>>();
-        base_inversion_unsalted::<Suite<NistP256, sha2::Sha256>>();
-        server_evaluate::<Suite<NistP256, sha2::Sha256>>();
+        base_retrieval::<NistP256>();
+        base_inversion_unsalted::<NistP256>();
+        server_evaluate::<NistP256>();
 
-        zeroize_oprf_client::<Suite<NistP256, sha2::Sha256>>();
-        zeroize_oprf_server::<Suite<NistP256, sha2::Sha256>>();
+        zeroize_oprf_client::<NistP256>();
+        zeroize_oprf_server::<NistP256>();
 
-        base_retrieval::<Suite<NistP384, sha2::Sha384>>();
-        base_inversion_unsalted::<Suite<NistP384, sha2::Sha384>>();
-        server_evaluate::<Suite<NistP384, sha2::Sha384>>();
+        base_retrieval::<NistP384>();
+        base_inversion_unsalted::<NistP384>();
+        server_evaluate::<NistP384>();
 
-        zeroize_oprf_client::<Suite<NistP384, sha2::Sha384>>();
-        zeroize_oprf_server::<Suite<NistP384, sha2::Sha384>>();
+        zeroize_oprf_client::<NistP384>();
+        zeroize_oprf_server::<NistP384>();
 
-        base_retrieval::<Suite<NistP521, sha2::Sha512>>();
-        base_inversion_unsalted::<Suite<NistP521, sha2::Sha512>>();
-        server_evaluate::<Suite<NistP521, sha2::Sha512>>();
+        base_retrieval::<NistP521>();
+        base_inversion_unsalted::<NistP521>();
+        server_evaluate::<NistP521>();
 
-        zeroize_oprf_client::<Suite<NistP521, sha2::Sha512>>();
-        zeroize_oprf_server::<Suite<NistP521, sha2::Sha512>>();
+        zeroize_oprf_client::<NistP521>();
+        zeroize_oprf_server::<NistP521>();
 
         Ok(())
     }

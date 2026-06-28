@@ -553,8 +553,8 @@ mod tests {
     use rand::rngs::SysRng;
 
     use super::*;
+    use crate::Group;
     use crate::common::{Dst, STR_HASH_TO_GROUP};
-    use crate::{Group, Suite};
 
     fn prf<CS: CipherSuite>(
         input: &[u8],
@@ -774,32 +774,32 @@ mod tests {
             zeroize_voprf_server::<Ristretto255>();
         }
 
-        verifiable_retrieval::<Suite<NistP256, sha2::Sha256>>();
-        verifiable_batch_retrieval::<Suite<NistP256, sha2::Sha256>>();
-        verifiable_bad_public_key::<Suite<NistP256, sha2::Sha256>>();
-        verifiable_batch_bad_public_key::<Suite<NistP256, sha2::Sha256>>();
-        verifiable_server_evaluate::<Suite<NistP256, sha2::Sha256>>();
+        verifiable_retrieval::<NistP256>();
+        verifiable_batch_retrieval::<NistP256>();
+        verifiable_bad_public_key::<NistP256>();
+        verifiable_batch_bad_public_key::<NistP256>();
+        verifiable_server_evaluate::<NistP256>();
 
-        zeroize_voprf_client::<Suite<NistP256, sha2::Sha256>>();
-        zeroize_voprf_server::<Suite<NistP256, sha2::Sha256>>();
+        zeroize_voprf_client::<NistP256>();
+        zeroize_voprf_server::<NistP256>();
 
-        verifiable_retrieval::<Suite<NistP384, sha2::Sha384>>();
-        verifiable_batch_retrieval::<Suite<NistP384, sha2::Sha384>>();
-        verifiable_bad_public_key::<Suite<NistP384, sha2::Sha384>>();
-        verifiable_batch_bad_public_key::<Suite<NistP384, sha2::Sha384>>();
-        verifiable_server_evaluate::<Suite<NistP384, sha2::Sha384>>();
+        verifiable_retrieval::<NistP384>();
+        verifiable_batch_retrieval::<NistP384>();
+        verifiable_bad_public_key::<NistP384>();
+        verifiable_batch_bad_public_key::<NistP384>();
+        verifiable_server_evaluate::<NistP384>();
 
-        zeroize_voprf_client::<Suite<NistP384, sha2::Sha384>>();
-        zeroize_voprf_server::<Suite<NistP384, sha2::Sha384>>();
+        zeroize_voprf_client::<NistP384>();
+        zeroize_voprf_server::<NistP384>();
 
-        verifiable_retrieval::<Suite<NistP521, sha2::Sha512>>();
-        verifiable_batch_retrieval::<Suite<NistP521, sha2::Sha512>>();
-        verifiable_bad_public_key::<Suite<NistP521, sha2::Sha512>>();
-        verifiable_batch_bad_public_key::<Suite<NistP521, sha2::Sha512>>();
-        verifiable_server_evaluate::<Suite<NistP521, sha2::Sha512>>();
+        verifiable_retrieval::<NistP521>();
+        verifiable_batch_retrieval::<NistP521>();
+        verifiable_bad_public_key::<NistP521>();
+        verifiable_batch_bad_public_key::<NistP521>();
+        verifiable_server_evaluate::<NistP521>();
 
-        zeroize_voprf_client::<Suite<NistP521, sha2::Sha512>>();
-        zeroize_voprf_server::<Suite<NistP521, sha2::Sha512>>();
+        zeroize_voprf_client::<NistP521>();
+        zeroize_voprf_server::<NistP521>();
 
         Ok(())
     }
