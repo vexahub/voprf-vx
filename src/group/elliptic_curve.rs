@@ -29,7 +29,7 @@ type ScalarLen<C> = FieldBytesSize<C>;
 
 impl<C> Group for C
 where
-    C: GroupDigest + MapToCurve,
+    C: GroupDigest,
     C::SecurityLevel: Mul<U2>,
     C::SecurityLevel: ArraySize,
     <C::SecurityLevel as Mul<U2>>::Output: ArraySize,
@@ -37,7 +37,6 @@ where
     ScalarLen<Self>: ModulusSize,
     ScalarLen<Self>: ArraySize,
     ScalarLen<Self>: hybrid_array::typenum::NonZero,
-    Scalar<Self>: elliptic_curve::ops::Reduce<Array<u8, ScalarLen<Self>>>,
     Scalar<Self>: elliptic_curve::ops::Reduce<Array<u8, <C as MapToCurve>::Length>>,
     AffinePoint<Self>: FromSec1Point<Self> + ToSec1Point<Self>,
     // `VoprfClientLen`, `PoprfClientLen`, `VoprfServerLen`, `PoprfServerLen`
@@ -57,8 +56,6 @@ where
     type ScalarLen = ScalarLen<Self>;
 
     type SecurityLevel = C::SecurityLevel;
-
-    type OkmLen = <C as MapToCurve>::Length;
 
     // Implements the `hash_to_curve()` function from
     // https://www.rfc-editor.org/rfc/rfc9380.html#section-3

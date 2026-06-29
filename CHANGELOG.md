@@ -1,20 +1,24 @@
 # Changelog
 
-## 0.7.0-pre.0 (June 28, 2026)
+## 1.0.0-pre.0 (June 29, 2026)
+
+Forked from [facebook/voprf](https://github.com/facebook/voprf/) at `0.6.0-pre.1`.
+
 * MSRV bumped to 1.87
 * Migrated from `elliptic-curve 0.13` to `0.14`
-* Replaced `generic-array` with `hybrid-array`
-* Updated `digest` dependency to 0.11
-* Updated `rand_core` dependency to 0.10
-* Updated `rand` dependency to 0.10
-* Updated `sha2` dependency to 0.11
-* Updated `p256`, `p384`, `p521` dependencies to 0.14.0-rc
+* Replaced `generic-array` with `hybrid-array 0.4`
+* Updated `digest` to 0.11, `rand_core` to 0.10, `rand` to 0.10, `sha2` to 0.11
+* Updated `p256`, `p384`, `p521` to `0.14`
 * Replaced `elliptic-curve/hash2curve` feature with standalone `hash2curve 0.14` crate
-* Updated `hash_to_scalar` to use `MapToCurve::Length` as OKM length per RFC 9380, replacing the removed `GroupDigest::hash_to_scalar` method
-* Updated `random_scalar` to consume exactly `ScalarLen` bytes per attempt, adapting to the new `rand_core 0.10` API
-* Added `OkmLen` associated type to `Group` trait
+* Removed `VoprfParameters` dependency to be replaced with `OprfParameters` + `GroupDigest`
+* Added `SecurityLevel` associated type to `Group` trait for generic hash bounds
+* Added `OkmLen` associated type to `Group` trait (`MapToCurve::Length`)
+* Updated `hash_to_scalar` to use `MapToCurve::Length` as OKM length per RFC 9380
+* Updated `random_scalar` for deterministic byte consumption with `rand_core 0.10`
+* Auto-impl `CipherSuite` for any `OprfParameters + Group` type via `OprfHash<T>`
 
 ## 0.6.0-pre.1 (April 6, 2026)
+
 * MSRV bumped to 1.85
 * Updated rand_core dependency to 0.9
 * Updated rand dependency to 0.9
@@ -22,40 +26,50 @@
 * Fixed docs issue
 
 ## 0.6.0-pre.0 (November 8, 2025)
+
 * MSRV bumped to 1.83
 * Updated Ristretto255 random scalar generation
 * Updated generic-array to v1
 
 ## 0.5.0 (March 6, 2024)
+
 * Just a version bump from v0.5.0-pre.7
 
 ## 0.5.0-pre.7 (January 11, 2024)
+
 * Updated to be in sync with RFC 9497
 
 ## 0.5.0-pre.6 (July 24, 2023)
+
 * Updated curve25519-dalek dependency to 4
 
 ## 0.5.0-pre.5 (June 27, 2023)
+
 * Updated curve25519-dalek dependency to 4.0.0-rc.3
 
 ## 0.5.0-pre.4 (May 20, 2023)
+
 * Updated curve25519-dalek dependency to 4.0.0-rc.2
 
 ## 0.5.0-pre.3 (March 4, 2023)
+
 * Updated to be in sync with draft-irtf-cfrg-voprf-19
 * Increased MSRV to 1.65
 * Updated p256 dependency to v0.13
 * Added p384 tests
 
 ## 0.5.0-pre.2 (February 3, 2023)
+
 * Increased MSRV to 1.60
 * Updated p256 dependency to v0.12
 * Updated curve25519-dalek dependency to 4.0.0-rc.1
 
 ## 0.5.0-pre.1 (December 19, 2022)
+
 * Updated curve25519-dalek dependency to 4.0.0-pre.5
 
 ## 0.4.0 (September 15, 2022)
+
 * Updated to be in sync with draft-irtf-cfrg-voprf-11, with
   the addition of the POPRF mode
 * Adds the evaluate() function to the servers to calculate the output of the OPRF

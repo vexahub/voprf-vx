@@ -8,7 +8,7 @@ This implementation is based on [RFC 9497](https://www.rfc-editor.org/rfc/rfc949
 Documentation
 -------------
 
-The API can be found [here](https://docs.rs/voprf-vexahub/) along with an example for usage.
+The API can be found [here](https://docs.rs/voprf-vx/) along with an example for usage.
 
 Installation
 ------------
@@ -16,7 +16,7 @@ Installation
 Add the following line to the dependencies of your `Cargo.toml`:
 
 ```
-voprf = { package = "voprf-vexahub", version = "0.6.0-rc.0" }
+voprf = { package = "voprf-vx", version = "1.0.0-pre.0" }
 ```
 
 ### Minimum Supported Rust Version
@@ -26,7 +26,9 @@ Rust **1.87** or higher.
 Contributors
 ------------
 
-The author of this code is Kevin Lewi ([@kevinlewi](https://github.com/kevinlewi)).
+This is a fork of [facebook/voprf](https://github.com/facebook/voprf/) maintained by [VexaHub](https://github.com/vexahub).
+
+The original author is Kevin Lewi ([@kevinlewi](https://github.com/kevinlewi)).
 To learn more about contributing to this project, [see this document](./CONTRIBUTING.md).
 
 License

@@ -1,15 +1,15 @@
 [package]
-authors = ["Kevin Lewi <lewi.kevin.k@gmail.com>"]
+authors = ["VexaHub Developers", "Kevin Lewi <lewi.kevin.k@gmail.com>"]
 categories = ["no-std", "algorithms", "cryptography"]
 description = "An implementation of a verifiable oblivious pseudorandom function (VOPRF)"
 edition = "2024"
-keywords = ["oprf"]
+keywords = ["oprf", "voprf", "cryptography", "oblivious-prf"]
 license = "MIT"
-name = "voprf-vexahub"
+name = "voprf-vx"
 readme = "README.md"
-repository = "https://github.com/facebook/voprf/"
+repository = "https://github.com/vexahub/voprf-vx/"
 rust-version = "1.87"
-version = "0.7.0-pre.0"
+version = "1.0.0-pre.0"
 
 [features]
 alloc = []

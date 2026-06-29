@@ -12,8 +12,8 @@ use crate::Group;
 use core::ops::Mul;
 use digest::block_api::BlockSizeUser;
 use digest::typenum::{IsLess, IsLessOrEqual, U256};
-use digest::{Digest, FixedOutput, HashMarker, OutputSizeUser};
-use hash2curve::{ExpandMsg, GroupDigest, OprfParameters};
+use digest::{FixedOutput, HashMarker, OutputSizeUser};
+use hash2curve::{ExpandMsg, GroupDigest, MapToCurve, OprfParameters};
 use hybrid_array::ArraySize;
 use hybrid_array::typenum::{IsGreaterOrEqual, Prod, True, U2};
 
@@ -36,34 +36,24 @@ where
 
     /// The main hash function to use (for HKDF computations and hashing
     /// transcripts).
-    type Hash: Digest + BlockSizeUser + Default + FixedOutput + HashMarker;
+    type Hash: BlockSizeUser + Default + FixedOutput + HashMarker;
 }
 
-/// Trait associating a hash to an elliptic curve for OPRF usage.
-pub trait OprfCipherSuite: OprfParameters + Group {
-    type Hash: Digest + BlockSizeUser + Default + FixedOutput + HashMarker + OutputSizeUser;
-}
+/// The hash function associated with a curve's OPRF `expand_message` implementation.
+type OprfHash<T> =
+    <<T as GroupDigest>::ExpandMsg as ExpandMsg<<T as MapToCurve>::SecurityLevel>>::Hash;
 
-impl<T> OprfCipherSuite for T
-where
-    T: OprfParameters + Group,
-    <T as GroupDigest>::ExpandMsg: ExpandMsg<<T as Group>::SecurityLevel>,
-    <<T as GroupDigest>::ExpandMsg as ExpandMsg<<T as Group>::SecurityLevel>>::Hash:
-        Digest + BlockSizeUser + Default + FixedOutput + HashMarker + OutputSizeUser,
-{
-    type Hash = <<T as GroupDigest>::ExpandMsg as ExpandMsg<<T as Group>::SecurityLevel>>::Hash;
-}
-
-impl<T: OprfCipherSuite> CipherSuite for T
+impl<T: OprfParameters> CipherSuite for T
 where
     T: Group,
     <T as Group>::SecurityLevel: Mul<U2>,
-    <<T as OprfCipherSuite>::Hash as OutputSizeUser>::OutputSize: ArraySize
+    OprfHash<T>: BlockSizeUser + Default + FixedOutput + HashMarker,
+    <OprfHash<T> as OutputSizeUser>::OutputSize: ArraySize
         + IsLess<U256>
-        + IsLessOrEqual<<<T as OprfCipherSuite>::Hash as BlockSizeUser>::BlockSize, Output = True>
+        + IsLessOrEqual<<OprfHash<T> as BlockSizeUser>::BlockSize, Output = True>
         + IsGreaterOrEqual<Prod<<T as Group>::SecurityLevel, U2>, Output = True>,
 {
     const ID: &'static [u8] = T::ID;
     type Group = T;
-    type Hash = <T as OprfCipherSuite>::Hash;
+    type Hash = OprfHash<T>;
 }

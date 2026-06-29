@@ -20,7 +20,7 @@
 //! We will use the following choice in this example:
 //!
 //! ```ignore
-//! type CipherSuite = voprf_vexahub::Ristretto255;
+//! type CipherSuite = voprf_vx::Ristretto255;
 //! ```
 //!
 //! ## Modes of Operation
@@ -51,12 +51,12 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
-//! use voprf_vexahub::OprfServer;
+//! use voprf_vx::OprfServer;
 //!
 //! let mut server_rng = SysRng;
 //! let server = OprfServer::<CipherSuite>::new(&mut server_rng);
@@ -71,12 +71,12 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
-//! use voprf_vexahub::OprfClient;
+//! use voprf_vx::OprfClient;
 //!
 //! let mut client_rng = SysRng;
 //! let client_blind_result = OprfClient::<CipherSuite>::blind(b"input", &mut client_rng)
@@ -92,10 +92,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::OprfClient;
+//! # use voprf_vx::OprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -103,7 +103,7 @@
 //! #     b"input",
 //! #     &mut client_rng,
 //! # ).expect("Unable to construct client");
-//! # use voprf_vexahub::OprfServer;
+//! # use voprf_vx::OprfServer;
 //! # let mut server_rng = SysRng;
 //! # let server = OprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! let server_evaluate_result = server.blind_evaluate(&client_blind_result.message);
@@ -117,10 +117,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::OprfClient;
+//! # use voprf_vx::OprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -128,7 +128,7 @@
 //! #     b"input",
 //! #     &mut client_rng,
 //! # ).expect("Unable to construct client");
-//! # use voprf_vexahub::OprfServer;
+//! # use voprf_vx::OprfServer;
 //! # let mut server_rng = SysRng;
 //! # let server = OprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! # let message = server.blind_evaluate(&client_blind_result.message);
@@ -150,10 +150,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::OprfClient;
+//! # use voprf_vx::OprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -161,7 +161,7 @@
 //! #     b"input",
 //! #     &mut client_rng,
 //! # ).expect("Unable to construct client");
-//! # use voprf_vexahub::OprfServer;
+//! # use voprf_vx::OprfServer;
 //! # let mut server_rng = SysRng;
 //! # let server = OprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! # let message = server.blind_evaluate(&client_blind_result.message);
@@ -197,12 +197,12 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
-//! use voprf_vexahub::VoprfServer;
+//! use voprf_vx::VoprfServer;
 //!
 //! let mut server_rng = SysRng;
 //! let server = VoprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
@@ -224,12 +224,12 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
 //! use rand::rngs::SysRng;
 //! use rand::Rng;
-//! use voprf_vexahub::VoprfClient;
+//! use voprf_vx::VoprfClient;
 //!
 //! let mut client_rng = SysRng;
 //! let client_blind_result = VoprfClient::<CipherSuite>::blind(b"input", &mut client_rng)
@@ -246,10 +246,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::{VoprfServerEvaluateResult, VoprfClient};
+//! # use voprf_vx::{VoprfServerEvaluateResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -257,7 +257,7 @@
 //! #     b"input",
 //! #     &mut client_rng,
 //! # ).expect("Unable to construct client");
-//! # use voprf_vexahub::VoprfServer;
+//! # use voprf_vx::VoprfServer;
 //! # let mut server_rng = SysRng;
 //! # let server = VoprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! let VoprfServerEvaluateResult { message, proof } =
@@ -273,10 +273,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::VoprfClient;
+//! # use voprf_vx::VoprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -284,7 +284,7 @@
 //! #     b"input",
 //! #     &mut client_rng,
 //! # ).expect("Unable to construct client");
-//! # use voprf_vexahub::VoprfServer;
+//! # use voprf_vx::VoprfServer;
 //! # let mut server_rng = SysRng;
 //! # let server = VoprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! # let server_evaluate_result = server.blind_evaluate(
@@ -314,10 +314,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::VoprfClient;
+//! # use voprf_vx::VoprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -325,7 +325,7 @@
 //! #     b"input",
 //! #     &mut client_rng,
 //! # ).expect("Unable to construct client");
-//! # use voprf_vexahub::VoprfServer;
+//! # use voprf_vx::VoprfServer;
 //! # let mut server_rng = SysRng;
 //! # let server = VoprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! # let server_evaluate_result = server.blind_evaluate(
@@ -368,10 +368,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::VoprfClient;
+//! # use voprf_vx::VoprfClient;
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! let mut client_rng = SysRng;
@@ -392,10 +392,10 @@
 //!
 //! ```
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::{VoprfServerBatchEvaluateFinishResult, VoprfClient};
+//! # use voprf_vx::{VoprfServerBatchEvaluateFinishResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -409,7 +409,7 @@
 //! #     client_states.push(client_blind_result.state);
 //! #     client_messages.push(client_blind_result.message);
 //! # }
-//! # use voprf_vexahub::VoprfServer;
+//! # use voprf_vx::VoprfServer;
 //! let mut server_rng = SysRng;
 //! # let server = VoprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! let prepared_evaluation_elements = server.batch_blind_evaluate_prepare(client_messages.iter());
@@ -426,10 +426,10 @@
 //! ```
 //! # #[cfg(feature = "alloc")] {
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::{VoprfServerBatchEvaluateResult, VoprfClient};
+//! # use voprf_vx::{VoprfServerBatchEvaluateResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -443,7 +443,7 @@
 //! #     client_states.push(client_blind_result.state);
 //! #     client_messages.push(client_blind_result.message);
 //! # }
-//! # use voprf_vexahub::VoprfServer;
+//! # use voprf_vx::VoprfServer;
 //! let mut server_rng = SysRng;
 //! # let server = VoprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! let VoprfServerBatchEvaluateResult { messages, proof } = server
@@ -460,10 +460,10 @@
 //! ```
 //! # #[cfg(feature = "alloc")] {
 //! # #[cfg(feature = "ristretto255")]
-//! # type CipherSuite = voprf_vexahub::Ristretto255;
+//! # type CipherSuite = voprf_vx::Ristretto255;
 //! # #[cfg(not(feature = "ristretto255"))]
 //! # type CipherSuite = p256::NistP256;
-//! # use voprf_vexahub::{VoprfServerBatchEvaluateResult, VoprfClient};
+//! # use voprf_vx::{VoprfServerBatchEvaluateResult, VoprfClient};
 //! # use rand::{rngs::SysRng, Rng};
 //! #
 //! # let mut client_rng = SysRng;
@@ -477,7 +477,7 @@
 //! #     client_states.push(client_blind_result.state);
 //! #     client_messages.push(client_blind_result.message);
 //! # }
-//! # use voprf_vexahub::VoprfServer;
+//! # use voprf_vx::VoprfServer;
 //! # let mut server_rng = SysRng;
 //! # let server = VoprfServer::<CipherSuite>::new(&mut server_rng).unwrap();
 //! # let VoprfServerBatchEvaluateResult { messages, proof } = server

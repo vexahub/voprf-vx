@@ -66,9 +66,6 @@ where
     /// `expand_message` requirement `len_in_bytes = 2 * k / 8`.
     type SecurityLevel: ArraySize;
 
-    /// The OKM length for hash_to_scalar (>= ScalarLen, used by hash_to_field).
-    type OkmLen: ArraySize + hybrid_array::typenum::NonZero;
-
     /// Transforms a password and domain separation tag (DST) into a curve point
     ///
     /// # Errors

@@ -17,7 +17,7 @@ use digest::{FixedOutput, HashMarker};
 use hash2curve::{ExpandMsg, ExpandMsgXmd, Expander};
 use hybrid_array::Array;
 use hybrid_array::typenum::{
-    IsGreaterOrEqual, IsLess, IsLessOrEqual, Prod, True, U2, U16, U32, U64, U256,
+    IsGreaterOrEqual, IsLess, IsLessOrEqual, Prod, True, U2, U16, U32, U256,
 };
 use rand_core::{TryCryptoRng, TryRng};
 use subtle::ConstantTimeEq;
@@ -48,8 +48,6 @@ impl Group for Ristretto255 {
     type ScalarLen = U32;
 
     type SecurityLevel = U16;
-
-    type OkmLen = U64;
 
     // Implements the `hash_to_ristretto255()` function from
     // https://www.rfc-editor.org/rfc/rfc9380.html#appendix-B
