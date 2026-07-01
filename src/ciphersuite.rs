@@ -9,7 +9,6 @@
 //! Defines the CipherSuite trait to specify the underlying primitives for VOPRF
 
 use crate::Group;
-use core::ops::Mul;
 use digest::block_api::BlockSizeUser;
 use digest::typenum::{IsLess, IsLessOrEqual, U256};
 use digest::{FixedOutput, HashMarker, OutputSizeUser};
@@ -20,7 +19,6 @@ use hybrid_array::typenum::{IsGreaterOrEqual, Prod, True, U2};
 /// Configures the underlying primitives used in VOPRF
 pub trait CipherSuite
 where
-    <Self::Group as Group>::SecurityLevel: Mul<U2>,
     <Self::Hash as OutputSizeUser>::OutputSize: ArraySize
         + IsLess<U256>
         + IsLessOrEqual<<Self::Hash as BlockSizeUser>::BlockSize, Output = True>
@@ -46,7 +44,6 @@ type OprfHash<T> =
 impl<T: OprfParameters> CipherSuite for T
 where
     T: Group,
-    <T as Group>::SecurityLevel: Mul<U2>,
     OprfHash<T>: BlockSizeUser + Default + FixedOutput + HashMarker,
     <OprfHash<T> as OutputSizeUser>::OutputSize: ArraySize
         + IsLess<U256>

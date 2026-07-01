@@ -67,9 +67,9 @@ where
     fn hash_to_scalar<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<Self::Scalar, InternalError>
     where
         H: BlockSizeUser + Default + FixedOutput + HashMarker,
-        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize, Output = True>,
-        C::SecurityLevel: Mul<U2>,
-        H::OutputSize: IsGreaterOrEqual<Prod<C::SecurityLevel, U2>, Output = True>,
+        H::OutputSize: IsLess<U256>
+            + IsLessOrEqual<H::BlockSize, Output = True>
+            + IsGreaterOrEqual<Prod<C::SecurityLevel, U2>, Output = True>,
     {
         hash_to_scalar::<C, ExpandMsgXmd<H>, <C as MapToCurve>::Length>(input, dst)
             .map_err(|_| InternalError::Input)

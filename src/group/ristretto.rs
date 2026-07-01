@@ -7,7 +7,7 @@
 // licenses.
 
 use core::num::NonZeroU16;
-use core::ops::Mul;
+
 use curve25519_dalek::constants::RISTRETTO_BASEPOINT_POINT;
 use curve25519_dalek::ristretto::{CompressedRistretto, RistrettoPoint};
 use curve25519_dalek::scalar::Scalar;
@@ -54,9 +54,9 @@ impl Group for Ristretto255 {
     fn hash_to_curve<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<Self::Elem, InternalError>
     where
         H: BlockSizeUser + Default + FixedOutput + HashMarker,
-        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize, Output = True>,
-        Self::SecurityLevel: Mul<U2>,
-        H::OutputSize: IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>,
+        H::OutputSize: IsLess<U256>
+            + IsLessOrEqual<H::BlockSize, Output = True>
+            + IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>,
     {
         let mut uniform_bytes = [0u8; 64];
 
@@ -77,9 +77,9 @@ impl Group for Ristretto255 {
     fn hash_to_scalar<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<Self::Scalar, InternalError>
     where
         H: BlockSizeUser + Default + FixedOutput + HashMarker,
-        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize, Output = True>,
-        Self::SecurityLevel: Mul<U2>,
-        H::OutputSize: IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>,
+        H::OutputSize: IsLess<U256>
+            + IsLessOrEqual<H::BlockSize, Output = True>
+            + IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>,
     {
         let mut uniform_bytes = [0u8; 64];
 

@@ -64,7 +64,7 @@ where
     /// Used to enforce `H::OutputSize >= 2 * SecurityLevel` in
     /// `hash_to_curve` and `hash_to_scalar`, which corresponds to the
     /// `expand_message` requirement `len_in_bytes = 2 * k / 8`.
-    type SecurityLevel: ArraySize;
+    type SecurityLevel: ArraySize + Mul<U2>;
 
     /// Transforms a password and domain separation tag (DST) into a curve point
     ///
@@ -74,9 +74,9 @@ where
     fn hash_to_curve<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<Self::Elem, InternalError>
     where
         H: BlockSizeUser + Default + FixedOutput + HashMarker,
-        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize, Output = True>,
-        Self::SecurityLevel: Mul<U2>,
-        H::OutputSize: IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>;
+        H::OutputSize: IsLess<U256>
+            + IsLessOrEqual<H::BlockSize, Output = True>
+            + IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>;
 
     /// Hashes a slice of pseudo-random bytes to a scalar
     ///
@@ -86,9 +86,9 @@ where
     fn hash_to_scalar<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<Self::Scalar, InternalError>
     where
         H: BlockSizeUser + Default + FixedOutput + HashMarker,
-        H::OutputSize: IsLess<U256> + IsLessOrEqual<H::BlockSize, Output = True>,
-        Self::SecurityLevel: Mul<U2>,
-        H::OutputSize: IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>;
+        H::OutputSize: IsLess<U256>
+            + IsLessOrEqual<H::BlockSize, Output = True>
+            + IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>;
 
     /// Get the base point for the group
     fn base_elem() -> Self::Elem;

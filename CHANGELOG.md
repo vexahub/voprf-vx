@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-pre.1 (July 2, 2026)
+
+* Simplified ciphersuite trait
+* Moved multiplication operator to SecurityLevel type in Group trait
+
 ## 1.0.0-pre.0 (June 29, 2026)
 
 Forked from [facebook/voprf](https://github.com/facebook/voprf/) at `0.6.0-pre.1`.
