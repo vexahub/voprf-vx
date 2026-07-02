@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.0 (July 2, 2026)
+
+* Added missing license in Cargo manifest
+* Implement `zeroize` feature for `digest`, `hybrid-array` and `sha2`
+* Replaced license appendix in files while keeping original copyright
+
 ## 1.0.0-pre.1 (July 2, 2026)
 
 * Simplified ciphersuite trait
