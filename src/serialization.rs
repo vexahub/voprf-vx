@@ -34,6 +34,10 @@ impl<CS: CipherSuite> OprfClient<CS> {
     pub fn deserialize(mut input: &[u8]) -> Result<Self> {
         let blind = deserialize_scalar::<CS::Group>(&mut input)?;
 
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
+
         Ok(Self { blind })
     }
 }
@@ -58,6 +62,10 @@ impl<CS: CipherSuite> VoprfClient<CS> {
     pub fn deserialize(mut input: &[u8]) -> Result<Self> {
         let blind = deserialize_scalar::<CS::Group>(&mut input)?;
         let blinded_element = deserialize_elem::<CS::Group>(&mut input)?;
+
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
 
         Ok(Self {
             blind,
@@ -87,6 +95,10 @@ impl<CS: CipherSuite> PoprfClient<CS> {
         let blind = deserialize_scalar::<CS::Group>(&mut input)?;
         let blinded_element = deserialize_elem::<CS::Group>(&mut input)?;
 
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
+
         Ok(Self {
             blind,
             blinded_element,
@@ -109,6 +121,10 @@ impl<CS: CipherSuite> OprfServer<CS> {
     /// [`Error::Deserialization`] if failed to deserialize `input`.
     pub fn deserialize(mut input: &[u8]) -> Result<Self> {
         let sk = deserialize_scalar::<CS::Group>(&mut input)?;
+
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
 
         Ok(Self { sk })
     }
@@ -134,6 +150,10 @@ impl<CS: CipherSuite> VoprfServer<CS> {
         let sk = deserialize_scalar::<CS::Group>(&mut input)?;
         let pk = deserialize_elem::<CS::Group>(&mut input)?;
 
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
+
         Ok(Self { sk, pk })
     }
 }
@@ -157,6 +177,10 @@ impl<CS: CipherSuite> PoprfServer<CS> {
     pub fn deserialize(mut input: &[u8]) -> Result<Self> {
         let sk = deserialize_scalar::<CS::Group>(&mut input)?;
         let pk = deserialize_elem::<CS::Group>(&mut input)?;
+
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
 
         Ok(Self { sk, pk })
     }
@@ -183,6 +207,10 @@ impl<CS: CipherSuite> Proof<CS> {
         let c_scalar = deserialize_scalar::<CS::Group>(&mut input)?;
         let s_scalar = deserialize_scalar::<CS::Group>(&mut input)?;
 
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
+
         Ok(Proof { c_scalar, s_scalar })
     }
 }
@@ -203,6 +231,10 @@ impl<CS: CipherSuite> BlindedElement<CS> {
     pub fn deserialize(mut input: &[u8]) -> Result<Self> {
         let value = deserialize_elem::<CS::Group>(&mut input)?;
 
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
+
         Ok(Self(value))
     }
 }
@@ -222,6 +254,10 @@ impl<CS: CipherSuite> EvaluationElement<CS> {
     /// [`Error::Deserialization`] if failed to deserialize `input`.
     pub fn deserialize(mut input: &[u8]) -> Result<Self> {
         let value = deserialize_elem::<CS::Group>(&mut input)?;
+
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
 
         Ok(Self(value))
     }
@@ -317,6 +353,7 @@ mod test {
         VoprfClient, VoprfServer,
     };
 
+    // Fuzz: no panics on arbitrary input
     macro_rules! test_deserialize {
         ($item:ident, $bytes:ident) => {
             #[cfg(feature = "ristretto255")]
@@ -324,10 +361,41 @@ mod test {
                 let _ = $item::<crate::Ristretto255>::deserialize(&$bytes[..]);
             }
 
-            let _ = $item::<p256::NistP256>::deserialize(&$bytes[..]);
-            let _ = $item::<p384::NistP384>::deserialize(&$bytes[..]);
-            let _ = $item::<p521::NistP521>::deserialize(&$bytes[..]);
+            let _ = $item::<::p256::NistP256>::deserialize(&$bytes[..]);
+            let _ = $item::<::p384::NistP384>::deserialize(&$bytes[..]);
+            let _ = $item::<::p521::NistP521>::deserialize(&$bytes[..]);
         };
+    }
+
+    // Roundtrip: serialize to deserialize == original
+    macro_rules! test_roundtrip {
+        ($item:ident, $cs:ty, $constructor:expr) => {{
+            let original = $constructor;
+            let bytes = original.serialize();
+            let recovered = $item::<$cs>::deserialize(&bytes).expect("roundtrip deserialize");
+            assert_eq!(original.serialize(), recovered.serialize());
+        }};
+    }
+
+    // Trailing bytes: valid serialization + extra byte must fail
+    macro_rules! test_trailing {
+        ($item:ident, $cs:ty, $constructor:expr) => {{
+            let original = $constructor;
+            let bytes = original.serialize();
+            let mut extended = bytes.to_vec();
+            extended.push(0x00);
+            assert!($item::<$cs>::deserialize(&extended).is_err());
+        }};
+    }
+
+    // Truncated: valid serialization minus one byte must fail
+    macro_rules! test_truncated {
+        ($item:ident, $cs:ty, $constructor:expr) => {{
+            let original = $constructor;
+            let bytes = original.serialize();
+            let truncated = &bytes[..bytes.len() - 1];
+            assert!($item::<$cs>::deserialize(truncated).is_err());
+        }};
     }
 
     proptest! {
@@ -377,4 +445,103 @@ mod test {
             test_deserialize!(Proof, bytes);
         }
     }
+
+    macro_rules! structured_tests {
+        ($cs:ty, $mod:ident) => {
+            mod $mod {
+                use super::*;
+
+                use rand::rngs::SysRng;
+
+                #[test]
+                fn roundtrip_oprf_client() {
+                    let client = OprfClient::<$cs>::blind(b"input", &mut SysRng)
+                        .expect("blind")
+                        .state;
+                    test_roundtrip!(OprfClient, $cs, client);
+                }
+
+                #[test]
+                fn roundtrip_oprf_server() {
+                    let server = OprfServer::<$cs>::new(&mut SysRng).expect("new");
+                    test_roundtrip!(OprfServer, $cs, server);
+                }
+
+                #[test]
+                fn roundtrip_voprf_client() {
+                    let client = VoprfClient::<$cs>::blind(b"input", &mut SysRng)
+                        .expect("blind")
+                        .state;
+                    test_roundtrip!(VoprfClient, $cs, client);
+                }
+
+                #[test]
+                fn roundtrip_voprf_server() {
+                    let server = VoprfServer::<$cs>::new(&mut SysRng).expect("new");
+                    test_roundtrip!(VoprfServer, $cs, server);
+                }
+
+                #[test]
+                fn roundtrip_poprf_client() {
+                    let client = PoprfClient::<$cs>::blind(b"input", &mut SysRng)
+                        .expect("blind")
+                        .state;
+                    test_roundtrip!(PoprfClient, $cs, client);
+                }
+
+                #[test]
+                fn roundtrip_poprf_server() {
+                    let server = PoprfServer::<$cs>::new(&mut SysRng).expect("new");
+                    test_roundtrip!(PoprfServer, $cs, server);
+                }
+
+                #[test]
+                fn trailing_oprf_client() {
+                    let client = OprfClient::<$cs>::blind(b"input", &mut SysRng)
+                        .expect("blind")
+                        .state;
+                    test_trailing!(OprfClient, $cs, client);
+                }
+
+                #[test]
+                fn trailing_oprf_server() {
+                    let server = OprfServer::<$cs>::new(&mut SysRng).expect("new");
+                    test_trailing!(OprfServer, $cs, server);
+                }
+
+                #[test]
+                fn truncated_oprf_client() {
+                    let client = OprfClient::<$cs>::blind(b"input", &mut SysRng)
+                        .expect("blind")
+                        .state;
+                    test_truncated!(OprfClient, $cs, client);
+                }
+
+                #[test]
+                fn truncated_oprf_server() {
+                    let server = OprfServer::<$cs>::new(&mut SysRng).expect("new");
+                    test_truncated!(OprfServer, $cs, server);
+                }
+
+                #[test]
+                fn empty_input_fails() {
+                    assert!(OprfClient::<$cs>::deserialize(&[]).is_err());
+                    assert!(OprfServer::<$cs>::deserialize(&[]).is_err());
+                    assert!(VoprfClient::<$cs>::deserialize(&[]).is_err());
+                    assert!(VoprfServer::<$cs>::deserialize(&[]).is_err());
+                    assert!(PoprfClient::<$cs>::deserialize(&[]).is_err());
+                    assert!(PoprfServer::<$cs>::deserialize(&[]).is_err());
+                    assert!(BlindedElement::<$cs>::deserialize(&[]).is_err());
+                    assert!(EvaluationElement::<$cs>::deserialize(&[]).is_err());
+                    assert!(Proof::<$cs>::deserialize(&[]).is_err());
+                }
+            }
+        };
+    }
+
+    #[cfg(feature = "ristretto255")]
+    structured_tests!(crate::Ristretto255, ristretto255);
+    structured_tests!(::p256::NistP256, p256);
+    structured_tests!(::p384::NistP384, p384);
+    structured_tests!(::p521::NistP521, p521);
 }

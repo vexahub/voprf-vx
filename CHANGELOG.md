@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.1 (July 3, 2026)
+
+* Reject trailing bytes in all `deserialize` methods
+* Reject identity element in `deterministic_blind_unchecked` to prevent blinding bypass
+* Added roundtrip, trailing bytes, truncated, and empty input tests for serialization
+
 ## 1.0.0-rc.0 (July 2, 2026)
 
 * Added missing license in Cargo manifest
