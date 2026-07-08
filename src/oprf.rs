@@ -4,17 +4,16 @@
 
 //! Contains the main OPRF API
 
-use core::iter::{self, Map};
+use core::iter::{self};
 
 use derive_where::derive_where;
-use digest::{Digest, Output};
+use digest::Output;
 use hybrid_array::Array;
-use hybrid_array::typenum::Unsigned;
 use rand_core::{TryCryptoRng, TryRng};
 
 use crate::common::{
-    BlindedElement, EvaluationElement, Mode, STR_FINALIZE, derive_key_internal,
-    deterministic_blind_unchecked, hash_to_group, i2osp_2, server_evaluate_hash_input,
+    BlindedElement, EvaluationElement, Mode, derive_key_internal, deterministic_blind_unchecked,
+    finalize_after_unblind, hash_to_group, server_evaluate_hash_input,
 };
 #[cfg(feature = "serde")]
 use crate::serialization::serde::Scalar;
@@ -120,7 +119,7 @@ impl<CS: CipherSuite> OprfClient<CS> {
     ) -> Result<Output<CS::Hash>> {
         let unblinded_element = evaluation_element.0 * &CS::Group::invert_scalar(self.blind);
         let mut outputs =
-            finalize_after_unblind::<CS, _, _>(iter::once((input, unblinded_element)), &[]);
+            finalize_after_unblind::<CS, _, _>(iter::once((input, unblinded_element)));
         outputs.next().unwrap()
     }
 
@@ -217,43 +216,6 @@ pub struct OprfClientBlindResult<CS: CipherSuite> {
     pub message: BlindedElement<CS>,
 }
 
-/////////////////////
-// Inner functions //
-// =============== //
-/////////////////////
-
-type FinalizeAfterUnblindResult<'a, C, I, IE> = Map<
-    IE,
-    fn((I, <<C as CipherSuite>::Group as Group>::Elem)) -> Result<Output<<C as CipherSuite>::Hash>>,
->;
-
-/// Returned values can only fail with [`Error::Input`].
-fn finalize_after_unblind<
-    'a,
-    CS: CipherSuite,
-    I: AsRef<[u8]>,
-    IE: 'a + Iterator<Item = (I, <CS::Group as Group>::Elem)>,
->(
-    inputs_and_unblinded_elements: IE,
-    _unused: &'a [u8],
-) -> FinalizeAfterUnblindResult<'a, CS, I, IE> {
-    inputs_and_unblinded_elements.map(|(input, unblinded_element)| {
-        let elem_len = <CS::Group as Group>::ElemLen::U16.to_be_bytes();
-
-        // hashInput = I2OSP(len(input), 2) || input ||
-        //             I2OSP(len(unblindedElement), 2) || unblindedElement ||
-        //             "Finalize"
-        // return Hash(hashInput)
-        Ok(CS::Hash::new()
-            .chain_update(i2osp_2(input.as_ref().len()).map_err(|_| Error::Input)?)
-            .chain_update(input.as_ref())
-            .chain_update(elem_len)
-            .chain_update(CS::Group::serialize_elem(unblinded_element))
-            .chain_update(STR_FINALIZE)
-            .finalize())
-    })
-}
-
 ///////////
 // Tests //
 // ===== //
@@ -269,23 +231,7 @@ mod tests {
     use super::*;
     use crate::Group;
     use crate::common::{Dst, STR_HASH_TO_GROUP};
-
-    fn prf<CS: CipherSuite>(
-        input: &[u8],
-        key: <CS::Group as Group>::Scalar,
-        info: &[u8],
-        mode: Mode,
-    ) -> Output<CS::Hash> {
-        let dst = Dst::new::<CS, _>(STR_HASH_TO_GROUP, mode);
-        let point = CS::Group::hash_to_curve::<CS::Hash>(&[input], &dst.as_dst()).unwrap();
-
-        let res = point * &key;
-
-        finalize_after_unblind::<CS, _, _>(iter::once((input, res)), info)
-            .next()
-            .unwrap()
-            .unwrap()
-    }
+    use crate::tests::helpers::prf;
 
     fn base_retrieval<CS: CipherSuite>() {
         let input = b"input";
@@ -294,7 +240,7 @@ mod tests {
         let server = OprfServer::<CS>::new(&mut rng).unwrap();
         let message = server.blind_evaluate(&client_blind_result.message);
         let client_finalize_result = client_blind_result.state.finalize(input, &message).unwrap();
-        let res2 = prf::<CS>(input, server.get_private_key(), &[], Mode::Oprf);
+        let res2 = prf::<CS>(input, server.get_private_key(), Mode::Oprf);
         assert_eq!(client_finalize_result, res2);
     }
 
@@ -310,7 +256,7 @@ mod tests {
 
         let dst = Dst::new::<CS, _>(STR_HASH_TO_GROUP, Mode::Oprf);
         let point = CS::Group::hash_to_curve::<CS::Hash>(&[&input], &dst.as_dst()).unwrap();
-        let res2 = finalize_after_unblind::<CS, _, _>(iter::once((input.as_ref(), point)), &[])
+        let res2 = finalize_after_unblind::<CS, _, _>(iter::once((input.as_ref(), point)))
             .next()
             .unwrap()
             .unwrap();
@@ -371,45 +317,11 @@ mod tests {
         assert!(message.serialize().iter().all(|&x| x == 0));
     }
 
-    #[test]
-    fn test_functionality() -> Result<()> {
-        use p256::NistP256;
-        use p384::NistP384;
-        use p521::NistP521;
-
-        #[cfg(feature = "ristretto255")]
-        {
-            use crate::Ristretto255;
-
-            base_retrieval::<Ristretto255>();
-            base_inversion_unsalted::<Ristretto255>();
-            server_evaluate::<Ristretto255>();
-
-            zeroize_oprf_client::<Ristretto255>();
-            zeroize_oprf_server::<Ristretto255>();
-        }
-
-        base_retrieval::<NistP256>();
-        base_inversion_unsalted::<NistP256>();
-        server_evaluate::<NistP256>();
-
-        zeroize_oprf_client::<NistP256>();
-        zeroize_oprf_server::<NistP256>();
-
-        base_retrieval::<NistP384>();
-        base_inversion_unsalted::<NistP384>();
-        server_evaluate::<NistP384>();
-
-        zeroize_oprf_client::<NistP384>();
-        zeroize_oprf_server::<NistP384>();
-
-        base_retrieval::<NistP521>();
-        base_inversion_unsalted::<NistP521>();
-        server_evaluate::<NistP521>();
-
-        zeroize_oprf_client::<NistP521>();
-        zeroize_oprf_server::<NistP521>();
-
-        Ok(())
-    }
+    crate::tests::test_all_curves!(
+        base_retrieval,
+        base_inversion_unsalted,
+        server_evaluate,
+        zeroize_oprf_client,
+        zeroize_oprf_server,
+    );
 }

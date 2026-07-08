@@ -9,15 +9,14 @@ use alloc::vec::Vec;
 use core::iter::{self, Map, Repeat, Zip};
 
 use derive_where::derive_where;
-use digest::{Digest, Output};
+use digest::Output;
 use hybrid_array::Array;
-use hybrid_array::typenum::Unsigned;
 use rand_core::{TryCryptoRng, TryRng};
 
 use crate::common::{
-    BlindedElement, EvaluationElement, Mode, PreparedEvaluationElement, Proof, STR_FINALIZE,
-    derive_keypair, deterministic_blind_unchecked, generate_proof, hash_to_group, i2osp_2,
-    server_evaluate_hash_input, verify_proof,
+    BlindedElement, EvaluationElement, FinalizeAfterUnblindResult, Mode, PreparedEvaluationElement,
+    Proof, derive_keypair, deterministic_blind_unchecked, finalize_after_unblind, generate_proof,
+    hash_to_group, server_evaluate_hash_input, verify_proof,
 };
 #[cfg(feature = "serde")]
 use crate::serialization::serde::{Element, Scalar};
@@ -504,37 +503,6 @@ where
         .map(|(blind, x)| x.0 * &CS::Group::invert_scalar(blind)))
 }
 
-type FinalizeAfterUnblindResult<'a, C, I, IE> = Map<
-    IE,
-    fn((I, <<C as CipherSuite>::Group as Group>::Elem)) -> Result<Output<<C as CipherSuite>::Hash>>,
->;
-
-/// Returned values can only fail with [`Error::Input`].
-fn finalize_after_unblind<
-    'a,
-    CS: CipherSuite,
-    I: AsRef<[u8]>,
-    IE: 'a + Iterator<Item = (I, <CS::Group as Group>::Elem)>,
->(
-    inputs_and_unblinded_elements: IE,
-) -> FinalizeAfterUnblindResult<'a, CS, I, IE> {
-    inputs_and_unblinded_elements.map(|(input, unblinded_element)| {
-        let elem_len = <CS::Group as Group>::ElemLen::U16.to_be_bytes();
-
-        // hashInput = I2OSP(len(input), 2) || input ||
-        //             I2OSP(len(unblindedElement), 2) || unblindedElement ||
-        //             "Finalize"
-        // return Hash(hashInput)
-        Ok(CS::Hash::new()
-            .chain_update(i2osp_2(input.as_ref().len()).map_err(|_| Error::Input)?)
-            .chain_update(input.as_ref())
-            .chain_update(elem_len)
-            .chain_update(CS::Group::serialize_elem(unblinded_element))
-            .chain_update(STR_FINALIZE)
-            .finalize())
-    })
-}
-
 ///////////
 // Tests //
 // ===== //
@@ -551,22 +519,7 @@ mod tests {
     use super::*;
     use crate::Group;
     use crate::common::{Dst, STR_HASH_TO_GROUP};
-
-    fn prf<CS: CipherSuite>(
-        input: &[u8],
-        key: <CS::Group as Group>::Scalar,
-        mode: Mode,
-    ) -> Output<CS::Hash> {
-        let dst = Dst::new::<CS, _>(STR_HASH_TO_GROUP, mode);
-        let point = CS::Group::hash_to_curve::<CS::Hash>(&[input], &dst.as_dst()).unwrap();
-
-        let res = point * &key;
-
-        finalize_after_unblind::<CS, _, _>(iter::once((input, res)))
-            .next()
-            .unwrap()
-            .unwrap()
-    }
+    use crate::tests::helpers::prf;
 
     fn verifiable_retrieval<CS: CipherSuite>() {
         let input = b"input";
@@ -713,7 +666,7 @@ mod tests {
         // inputs
         let wrong_input = b"wrong input";
         let server_evaluate = server.evaluate(wrong_input).unwrap();
-        assert!(client_finalize != server_evaluate);
+        assert_ne!(client_finalize, server_evaluate);
     }
 
     fn zeroize_voprf_client<CS: CipherSuite>() {
@@ -750,53 +703,13 @@ mod tests {
         assert!(proof.serialize().iter().all(|&x| x == 0));
     }
 
-    #[test]
-    fn test_functionality() -> Result<()> {
-        use p256::NistP256;
-        use p384::NistP384;
-        use p521::NistP521;
-
-        #[cfg(feature = "ristretto255")]
-        {
-            use crate::Ristretto255;
-
-            verifiable_retrieval::<Ristretto255>();
-            verifiable_batch_retrieval::<Ristretto255>();
-            verifiable_bad_public_key::<Ristretto255>();
-            verifiable_batch_bad_public_key::<Ristretto255>();
-            verifiable_server_evaluate::<Ristretto255>();
-
-            zeroize_voprf_client::<Ristretto255>();
-            zeroize_voprf_server::<Ristretto255>();
-        }
-
-        verifiable_retrieval::<NistP256>();
-        verifiable_batch_retrieval::<NistP256>();
-        verifiable_bad_public_key::<NistP256>();
-        verifiable_batch_bad_public_key::<NistP256>();
-        verifiable_server_evaluate::<NistP256>();
-
-        zeroize_voprf_client::<NistP256>();
-        zeroize_voprf_server::<NistP256>();
-
-        verifiable_retrieval::<NistP384>();
-        verifiable_batch_retrieval::<NistP384>();
-        verifiable_bad_public_key::<NistP384>();
-        verifiable_batch_bad_public_key::<NistP384>();
-        verifiable_server_evaluate::<NistP384>();
-
-        zeroize_voprf_client::<NistP384>();
-        zeroize_voprf_server::<NistP384>();
-
-        verifiable_retrieval::<NistP521>();
-        verifiable_batch_retrieval::<NistP521>();
-        verifiable_bad_public_key::<NistP521>();
-        verifiable_batch_bad_public_key::<NistP521>();
-        verifiable_server_evaluate::<NistP521>();
-
-        zeroize_voprf_client::<NistP521>();
-        zeroize_voprf_server::<NistP521>();
-
-        Ok(())
-    }
+    crate::tests::test_all_curves!(
+        verifiable_retrieval,
+        verifiable_batch_retrieval,
+        verifiable_bad_public_key,
+        verifiable_batch_bad_public_key,
+        verifiable_server_evaluate,
+        zeroize_voprf_client,
+        zeroize_voprf_server,
+    );
 }

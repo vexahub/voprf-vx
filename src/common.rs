@@ -5,6 +5,7 @@
 //! Common functionality between multiple OPRF modes.
 
 use core::convert::TryFrom;
+use core::iter::Map;
 use core::ops::Add;
 
 use derive_where::derive_where;
@@ -447,6 +448,33 @@ pub(crate) fn server_evaluate_hash_input<CS: CipherSuite>(
         .chain_update(issued_element)
         .chain_update(STR_FINALIZE)
         .finalize())
+}
+
+pub(crate) type FinalizeAfterUnblindResult<'a, C, I, IE> = Map<
+    IE,
+    fn((I, <<C as CipherSuite>::Group as Group>::Elem)) -> Result<Output<<C as CipherSuite>::Hash>>,
+>;
+
+/// Returned values can only fail with [`Error::Input`].
+pub(crate) fn finalize_after_unblind<
+    'a,
+    CS: CipherSuite,
+    I: AsRef<[u8]>,
+    IE: 'a + Iterator<Item = (I, <CS::Group as Group>::Elem)>,
+>(
+    inputs_and_unblinded_elements: IE,
+) -> FinalizeAfterUnblindResult<'a, CS, I, IE> {
+    inputs_and_unblinded_elements.map(|(input, unblinded_element)| {
+        let elem_len = <CS::Group as Group>::ElemLen::U16.to_be_bytes();
+
+        Ok(CS::Hash::new()
+            .chain_update(i2osp_2(input.as_ref().len()).map_err(|_| Error::Input)?)
+            .chain_update(input.as_ref())
+            .chain_update(elem_len)
+            .chain_update(CS::Group::serialize_elem(unblinded_element))
+            .chain_update(STR_FINALIZE)
+            .finalize())
+    })
 }
 
 pub(crate) struct Dst<L: ArraySize> {

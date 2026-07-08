@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 (July 8, 2026)
+
+* Deduplicated serialization with `impl_serde_scalar`, `impl_serde_elem`, and `impl_serde_scalar_elem` macros
+* Moved `finalize_after_unblind` to `common.rs`, shared by OPRF and VOPRF
+* Added shared test helpers (`test_all_curves` macro, `prf` function)
+* Updated dependencies to stable releases
+
 ## 1.0.0-rc.1 (July 3, 2026)
 
 * Reject trailing bytes in all `deserialize` methods

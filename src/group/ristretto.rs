@@ -54,16 +54,7 @@ impl Group for Ristretto255 {
             + IsLessOrEqual<H::BlockSize, Output = True>
             + IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>,
     {
-        let mut uniform_bytes = [0u8; 64];
-
-        <ExpandMsgXmd<H> as ExpandMsg<U16>>::expand_message(
-            input,
-            dst,
-            NonZeroU16::new(64).unwrap(),
-        )
-        .map_err(|_| InternalError::Input)?
-        .fill_bytes(&mut uniform_bytes)
-        .map_err(|_| InternalError::Input)?;
+        let uniform_bytes = expand_uniform_bytes::<H>(input, dst)?;
 
         Ok(RistrettoPoint::from_uniform_bytes(&uniform_bytes))
     }
@@ -77,16 +68,7 @@ impl Group for Ristretto255 {
             + IsLessOrEqual<H::BlockSize, Output = True>
             + IsGreaterOrEqual<Prod<Self::SecurityLevel, U2>, Output = True>,
     {
-        let mut uniform_bytes = [0u8; 64];
-
-        <ExpandMsgXmd<H> as ExpandMsg<U16>>::expand_message(
-            input,
-            dst,
-            NonZeroU16::new(64).unwrap(),
-        )
-        .map_err(|_| InternalError::Input)?
-        .fill_bytes(&mut uniform_bytes)
-        .map_err(|_| InternalError::Input)?;
+        let uniform_bytes = expand_uniform_bytes::<H>(input, dst)?;
 
         Ok(Scalar::from_bytes_mod_order_wide(&uniform_bytes))
     }
@@ -149,4 +131,23 @@ impl Group for Ristretto255 {
             .filter(|scalar| scalar != &Scalar::ZERO)
             .ok_or(Error::Deserialization)
     }
+}
+
+// HELPERS
+
+fn expand_uniform_bytes<H>(input: &[&[u8]], dst: &[&[u8]]) -> Result<[u8; 64], InternalError>
+where
+    H: BlockSizeUser + Default + FixedOutput + HashMarker,
+    H::OutputSize: IsLess<U256>
+        + IsLessOrEqual<H::BlockSize, Output = True>
+        + IsGreaterOrEqual<Prod<U16, U2>, Output = True>,
+{
+    let mut uniform_bytes = [0u8; 64];
+
+    <ExpandMsgXmd<H> as ExpandMsg<U16>>::expand_message(input, dst, NonZeroU16::new(64).unwrap())
+        .map_err(|_| InternalError::Input)?
+        .fill_bytes(&mut uniform_bytes)
+        .map_err(|_| InternalError::Input)?;
+
+    Ok(uniform_bytes)
 }

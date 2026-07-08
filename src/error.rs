@@ -18,7 +18,7 @@ pub enum Error {
     DeriveKeyPair,
     /// Failure to deserialize bytes
     Deserialization,
-    /// Batched items are more then [`u16::MAX`] or length don't match.
+    /// Batched items are more than [`u16::MAX`] or length don't match.
     Batch,
     /// In verifiable mode, occurs when the proof failed to verify
     ProofVerification,

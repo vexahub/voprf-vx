@@ -13,255 +13,10 @@ use crate::{
     PoprfClient, PoprfServer, Proof, Result, VoprfClient, VoprfServer,
 };
 
-//////////////////////////////////////////////////////////
-// Serialization and Deserialization for High-Level API //
-// ==================================================== //
-//////////////////////////////////////////////////////////
-
-/// Length of [`OprfClient`] in bytes for serialization.
-pub type OprfClientLen<CS> = <<CS as CipherSuite>::Group as Group>::ScalarLen;
-
-impl<CS: CipherSuite> OprfClient<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, OprfClientLen<CS>> {
-        CS::Group::serialize_scalar(self.blind)
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let blind = deserialize_scalar::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self { blind })
-    }
-}
-
-/// Length of [`VoprfClient`] in bytes for serialization.
-pub type VoprfClientLen<CS> = Sum<
-    <<CS as CipherSuite>::Group as Group>::ScalarLen,
-    <<CS as CipherSuite>::Group as Group>::ElemLen,
->;
-
-impl<CS: CipherSuite> VoprfClient<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, VoprfClientLen<CS>> {
-        <CS::Group as Group>::serialize_scalar(self.blind)
-            .concat(<CS::Group as Group>::serialize_elem(self.blinded_element))
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let blind = deserialize_scalar::<CS::Group>(&mut input)?;
-        let blinded_element = deserialize_elem::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self {
-            blind,
-            blinded_element,
-        })
-    }
-}
-
-/// Length of [`PoprfClient`] in bytes for serialization.
-pub type PoprfClientLen<CS> = Sum<
-    <<CS as CipherSuite>::Group as Group>::ScalarLen,
-    <<CS as CipherSuite>::Group as Group>::ElemLen,
->;
-
-impl<CS: CipherSuite> PoprfClient<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, PoprfClientLen<CS>> {
-        <CS::Group as Group>::serialize_scalar(self.blind)
-            .concat(<CS::Group as Group>::serialize_elem(self.blinded_element))
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let blind = deserialize_scalar::<CS::Group>(&mut input)?;
-        let blinded_element = deserialize_elem::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self {
-            blind,
-            blinded_element,
-        })
-    }
-}
-
-/// Length of [`OprfServer`] in bytes for serialization.
-pub type OprfServerLen<CS> = <<CS as CipherSuite>::Group as Group>::ScalarLen;
-
-impl<CS: CipherSuite> OprfServer<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, OprfServerLen<CS>> {
-        CS::Group::serialize_scalar(self.sk)
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let sk = deserialize_scalar::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self { sk })
-    }
-}
-
-/// Length of [`VoprfServer`] in bytes for serialization.
-pub type VoprfServerLen<CS> = Sum<
-    <<CS as CipherSuite>::Group as Group>::ScalarLen,
-    <<CS as CipherSuite>::Group as Group>::ElemLen,
->;
-
-impl<CS: CipherSuite> VoprfServer<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, VoprfServerLen<CS>> {
-        CS::Group::serialize_scalar(self.sk).concat(CS::Group::serialize_elem(self.pk))
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let sk = deserialize_scalar::<CS::Group>(&mut input)?;
-        let pk = deserialize_elem::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self { sk, pk })
-    }
-}
-
-/// Length of [`PoprfServer`] in bytes for serialization.
-pub type PoprfServerLen<CS> = Sum<
-    <<CS as CipherSuite>::Group as Group>::ScalarLen,
-    <<CS as CipherSuite>::Group as Group>::ElemLen,
->;
-
-impl<CS: CipherSuite> PoprfServer<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, PoprfServerLen<CS>> {
-        CS::Group::serialize_scalar(self.sk).concat(CS::Group::serialize_elem(self.pk))
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let sk = deserialize_scalar::<CS::Group>(&mut input)?;
-        let pk = deserialize_elem::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self { sk, pk })
-    }
-}
-
-/// Length of [`Proof`] in bytes for serialization.
-pub type ProofLen<CS> = Sum<
-    <<CS as CipherSuite>::Group as Group>::ScalarLen,
-    <<CS as CipherSuite>::Group as Group>::ScalarLen,
->;
-
-impl<CS: CipherSuite> Proof<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, ProofLen<CS>> {
-        CS::Group::serialize_scalar(self.c_scalar)
-            .concat(CS::Group::serialize_scalar(self.s_scalar))
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let c_scalar = deserialize_scalar::<CS::Group>(&mut input)?;
-        let s_scalar = deserialize_scalar::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Proof { c_scalar, s_scalar })
-    }
-}
-
-/// Length of [`BlindedElement`] in bytes for serialization.
-pub type BlindedElementLen<CS> = <<CS as CipherSuite>::Group as Group>::ElemLen;
-
-impl<CS: CipherSuite> BlindedElement<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, BlindedElementLen<CS>> {
-        CS::Group::serialize_elem(self.0)
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let value = deserialize_elem::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self(value))
-    }
-}
-
-/// Length of [`EvaluationElement`] in bytes for serialization.
-pub type EvaluationElementLen<CS> = <<CS as CipherSuite>::Group as Group>::ElemLen;
-
-impl<CS: CipherSuite> EvaluationElement<CS> {
-    /// Serialization into bytes
-    pub fn serialize(&self) -> Array<u8, EvaluationElementLen<CS>> {
-        CS::Group::serialize_elem(self.0)
-    }
-
-    /// Deserialization from bytes
-    ///
-    /// # Errors
-    /// [`Error::Deserialization`] if failed to deserialize `input`.
-    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
-        let value = deserialize_elem::<CS::Group>(&mut input)?;
-
-        if !input.is_empty() {
-            return Err(Error::Deserialization);
-        }
-
-        Ok(Self(value))
-    }
-}
+/////////////////////////////
+// Deserialization Helpers //
+// ======================= //
+/////////////////////////////
 
 fn deserialize_elem<G: Group>(input: &mut &[u8]) -> Result<G::Elem> {
     let input = input
@@ -292,6 +47,158 @@ impl<T> SliceExt for [T] {
         Some(front)
     }
 }
+
+//////////////////////////////
+// Serialization Macros     //
+// ======================== //
+//////////////////////////////
+
+macro_rules! impl_serde_scalar {
+    ($ty:ident, $len:ident, $field:ident) => {
+        /// Length in bytes for serialization.
+        pub type $len<CS> = <<CS as CipherSuite>::Group as Group>::ScalarLen;
+
+        impl<CS: CipherSuite> $ty<CS> {
+            /// Serialization into bytes
+            pub fn serialize(&self) -> Array<u8, $len<CS>> {
+                CS::Group::serialize_scalar(self.$field)
+            }
+
+            /// Deserialization from bytes
+            ///
+            /// # Errors
+            /// [`Error::Deserialization`] if failed to deserialize `input`.
+            pub fn deserialize(mut input: &[u8]) -> Result<Self> {
+                let $field = deserialize_scalar::<CS::Group>(&mut input)?;
+
+                if !input.is_empty() {
+                    return Err(Error::Deserialization);
+                }
+
+                Ok(Self { $field })
+            }
+        }
+    };
+}
+
+macro_rules! impl_serde_scalar_elem {
+    ($ty:ident, $len:ident, $scalar_field:ident, $elem_field:ident) => {
+        /// Length in bytes for serialization.
+        pub type $len<CS> = Sum<
+            <<CS as CipherSuite>::Group as Group>::ScalarLen,
+            <<CS as CipherSuite>::Group as Group>::ElemLen,
+        >;
+
+        impl<CS: CipherSuite> $ty<CS> {
+            /// Serialization into bytes
+            pub fn serialize(&self) -> Array<u8, $len<CS>> {
+                <CS::Group as Group>::serialize_scalar(self.$scalar_field)
+                    .concat(<CS::Group as Group>::serialize_elem(self.$elem_field))
+            }
+
+            /// Deserialization from bytes
+            ///
+            /// # Errors
+            /// [`Error::Deserialization`] if failed to deserialize `input`.
+            pub fn deserialize(mut input: &[u8]) -> Result<Self> {
+                let $scalar_field = deserialize_scalar::<CS::Group>(&mut input)?;
+                let $elem_field = deserialize_elem::<CS::Group>(&mut input)?;
+
+                if !input.is_empty() {
+                    return Err(Error::Deserialization);
+                }
+
+                Ok(Self {
+                    $scalar_field,
+                    $elem_field,
+                })
+            }
+        }
+    };
+}
+
+macro_rules! impl_serde_elem {
+    ($ty:ident, $len:ident) => {
+        /// Length in bytes for serialization.
+        pub type $len<CS> = <<CS as CipherSuite>::Group as Group>::ElemLen;
+
+        impl<CS: CipherSuite> $ty<CS> {
+            /// Serialization into bytes
+            pub fn serialize(&self) -> Array<u8, $len<CS>> {
+                CS::Group::serialize_elem(self.0)
+            }
+
+            /// Deserialization from bytes
+            ///
+            /// # Errors
+            /// [`Error::Deserialization`] if failed to deserialize `input`.
+            pub fn deserialize(mut input: &[u8]) -> Result<Self> {
+                let value = deserialize_elem::<CS::Group>(&mut input)?;
+
+                if !input.is_empty() {
+                    return Err(Error::Deserialization);
+                }
+
+                Ok(Self(value))
+            }
+        }
+    };
+}
+
+//////////////////////////////////////////////////////////
+// Serialization and Deserialization for High-Level API //
+// ==================================================== //
+//////////////////////////////////////////////////////////
+
+impl_serde_scalar!(OprfClient, OprfClientLen, blind);
+impl_serde_scalar!(OprfServer, OprfServerLen, sk);
+
+impl_serde_elem!(BlindedElement, BlindedElementLen);
+impl_serde_elem!(EvaluationElement, EvaluationElementLen);
+
+impl_serde_scalar_elem!(VoprfClient, VoprfClientLen, blind, blinded_element);
+impl_serde_scalar_elem!(PoprfClient, PoprfClientLen, blind, blinded_element);
+impl_serde_scalar_elem!(VoprfServer, VoprfServerLen, sk, pk);
+impl_serde_scalar_elem!(PoprfServer, PoprfServerLen, sk, pk);
+
+/////////////////////
+// Proof (One-Off) //
+// =============== //
+/////////////////////
+
+/// Length of [`Proof`] in bytes for serialization.
+pub type ProofLen<CS> = Sum<
+    <<CS as CipherSuite>::Group as Group>::ScalarLen,
+    <<CS as CipherSuite>::Group as Group>::ScalarLen,
+>;
+
+impl<CS: CipherSuite> Proof<CS> {
+    /// Serialization into bytes
+    pub fn serialize(&self) -> Array<u8, ProofLen<CS>> {
+        CS::Group::serialize_scalar(self.c_scalar)
+            .concat(CS::Group::serialize_scalar(self.s_scalar))
+    }
+
+    /// Deserialization from bytes
+    ///
+    /// # Errors
+    /// [`Error::Deserialization`] if failed to deserialize `input`.
+    pub fn deserialize(mut input: &[u8]) -> Result<Self> {
+        let c_scalar = deserialize_scalar::<CS::Group>(&mut input)?;
+        let s_scalar = deserialize_scalar::<CS::Group>(&mut input)?;
+
+        if !input.is_empty() {
+            return Err(Error::Deserialization);
+        }
+
+        Ok(Proof { c_scalar, s_scalar })
+    }
+}
+
+///////////////////////////
+// Serde Support         //
+// ===================== //
+///////////////////////////
 
 #[cfg(feature = "serde")]
 pub(crate) mod serde {
