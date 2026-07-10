@@ -492,7 +492,7 @@ impl<L: ArraySize> Dst<L> {
         // <https://www.rfc-editor.org/rfc/rfc9497#section-3.1>
         let par_2 = ArrayN::<u8, 7>::from(STR_OPRF)
             .concat(ArrayN::<u8, 1>::from([mode.to_u8()]))
-            .concat(ArrayN::<u8, 1>::from([b'-']));
+            .concat(ArrayN::<u8, 1>::from(*b"-"));
 
         let dst_1 = par_1.concat(par_2);
         let dst_2 = CS::ID;

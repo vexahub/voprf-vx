@@ -50,7 +50,7 @@ p384 = { version = "0.14", default-features = false, features = [
     "hash2curve",
     "oprf",
 ] }
-p521 = { version = "0.14.0-rc.15", default-features = false, features = [
+p521 = { version = "0.14", default-features = false, features = [
     "hash2curve",
     "oprf",
 ] }
